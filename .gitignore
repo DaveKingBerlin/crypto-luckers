@@ -21,3 +21,8 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+/ethereum/deployedAddress.txt
+/ethereum/.env
+
+/ethereum/build/*
+.idea/*
