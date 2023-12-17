@@ -4,16 +4,15 @@ pragma solidity >=0.8.23 <0.9.0;
 contract LottogemeinschaftFabrik{
 
     address[] public lottogemeinschaften;
+    string[] public lottogemeinschaftsnamen;
+    mapping(string => address) public lottogemeinschaftsnamenmapping;
 
     function gruendeLottogemeinschaft (string memory name, uint anzahl, uint preis) public {
         address neueLottogemeinschaft = address( new Lottogemeinschaft(name, msg.sender, anzahl, preis));
         lottogemeinschaften.push(neueLottogemeinschaft);
+        lottogemeinschaftsnamen.push(name);
+        lottogemeinschaftsnamenmapping[name] = neueLottogemeinschaft;
     }
-
-    function getLottogemeinschaften() public view returns (address[] memory ){
-        return lottogemeinschaften;
-    }
-
 }
 
 contract Lottogemeinschaft {
