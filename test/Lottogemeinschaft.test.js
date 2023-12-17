@@ -18,7 +18,7 @@ beforeEach(async () => {
     .deploy({ data: compiledFactory.evm.bytecode.object })
     .send({ from: accounts[0], gas: "10000000" });
 
-  await factory.methods.gruendeLottogemeinschaft("Test", 2, 4).send({
+  await factory.methods.gruendeLottogemeinschaft("Test", 2, 4, 1, false).send({
     from: accounts[0],
     gas: "10000000"
   });
