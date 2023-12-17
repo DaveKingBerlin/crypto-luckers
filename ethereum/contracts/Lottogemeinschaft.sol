@@ -3,15 +3,19 @@ pragma solidity >=0.8.23 <0.9.0;
 
 contract LottogemeinschaftFabrik{
 
-    address[] public lottogemeinschaften;
+    address payable[] public lottogemeinschaften;
     string[] public lottogemeinschaftsnamen;
     mapping(string => address) public lottogemeinschaftsnamenmapping;
 
     function gruendeLottogemeinschaft (string memory name, uint anzahl, uint preis) public {
         address neueLottogemeinschaft = address( new Lottogemeinschaft(name, msg.sender, anzahl, preis));
-        lottogemeinschaften.push(neueLottogemeinschaft);
+        lottogemeinschaften.push(payable(neueLottogemeinschaft));
         lottogemeinschaftsnamen.push(name);
         lottogemeinschaftsnamenmapping[name] = neueLottogemeinschaft;
+    }
+
+    function getGegruendeteLottogemeinschaften() public view returns (address payable[] memory) {
+        return lottogemeinschaften;
     }
 }
 
@@ -30,7 +34,7 @@ contract Lottogemeinschaft {
     Lottotipp[] internal lottoschein;
     uint public anzahlLottotipps;
     mapping(address => bool) public mitspieler;
-    address[] public mitspielerAddressen;
+    mapping(uint => address) public mitspielerIndex; // Neues Mapping für Indexierung
     uint public anzahlTeilnehmerAktuell;
 
     uint public gewinnBetrag = 0;
@@ -78,6 +82,7 @@ contract Lottogemeinschaft {
         if (ueberschuss > 0) {
             payable(msg.sender).transfer(ueberschuss);
         }
+        mitspielerIndex[anzahlTeilnehmerAktuell - 1] = msg.sender; // Speichern des Mitspielers im Index
     }
 
     // Funktion zum Einzahlen des Gewinns
@@ -100,12 +105,13 @@ contract Lottogemeinschaft {
         require(anzahlTeilnehmerAktuell == maxTeilnehmerAnzahl, "Nicht alle Mitspieler haben teilgenommen");
         uint gewinnProPerson = address(this).balance / anzahlDerMitspieler;
         require(gewinnProPerson > 0, "Nicht genuegend Guthaben fuer Auszahlung");
+        uint gewinnProPerson = address(this).balance / anzahlTeilnehmerAktuell; // Einmalige Berechnung
 
         // Effects
         // Auszahlung in Chargen von jeweils 5 Mitspielern
         uint endChargeIndex = auszahlungsIndex + CHARGE_GROESSE;
-        for (uint i = auszahlungsIndex; i < endChargeIndex && i < anzahlDerMitspieler; i++) {
-            address mitspielerAdresse = mitspielerAddressen[i];
+        for (uint i = auszahlungsIndex; i < endChargeIndex && i < anzahlTeilnehmerAktuell; i++) {
+            address mitspielerAdresse = mitspielerIndex[i];
 
             // Sicherere Methode der Ether-Überweisung
             (bool sent, ) = payable(mitspielerAdresse).call{value: gewinnProPerson}("");

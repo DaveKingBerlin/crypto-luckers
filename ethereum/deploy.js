@@ -30,8 +30,8 @@ const deploy = async () => {
         maxFeePerGas
       });
 
-    const filePath = path.resolve(__dirname, 'deployedAddress.txt');
-    fs.writeFileSync(filePath, result.options.address);
+    const filePath = path.resolve(__dirname, 'deployedAddresses.txt');
+    fs.appendFileSync(filePath, result.options.address + '\n');
     console.log('Contract deployed to', result.options.address);
   } catch (error) {
     console.error('Deployment failed:', error);
