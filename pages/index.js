@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Card, Button } from "semantic-ui-react";
+import {Segment, Card, Button, Label, Sticky, Grid, Container, Advertisement } from "semantic-ui-react";
 import factory from "../ethereum/fabrik";
 import Layout from "../components/Layout";
 
@@ -20,9 +20,9 @@ class LottogemeinschaftIndex extends Component {
       return {
         header: name,
         description: (
-            <a>Springe zur Lottogemeinschaft</a>
+            <p> Zeige Details zur Lottogemeinschaft </p>
         ),
-        fluid: true,
+        fluid: false,
       };
     });
     return <Card.Group items={items} />;
@@ -31,16 +31,37 @@ class LottogemeinschaftIndex extends Component {
     return (
       <Layout>
         <div>
-          <h3>Übersicht erstellter Lottogemeinschaften</h3>
-            <a>
+        <Segment>
+          <Label ribbon color="blue" size="large">Verfügbare Aktionen</Label>
+          <Grid>
+            <Grid.Column textAlign="center">
+              <a>
+                      <Button
+                        content="Gründe neue Lottogemeinschaft"
+                        icon="add circle"
+                        primary
+                      />
+                    </a>
+            </Grid.Column>
+          </Grid>
+        </Segment>
+
+           <Advertisement unit='banner' test='Hier könnte ihre Werbung stehen' />
+
+           <Segment>
+          <Label ribbon color="green" size="large">Übersicht erstellter Lottogemeinschaften</Label>
+          <Grid>
+            <Grid.Column textAlign="center">
+              <a>
               <Button
-                floated="right"
-                content="Gründe Lottogemeinschaft"
-                icon="add circle"
-                primary
-              />
-            </a>
-          {this.renderLottogemeinschaften()}
+                        content={this.renderLottogemeinschaften()}
+                        secondary
+                      />
+              </a>
+            </Grid.Column>
+          </Grid>
+        </Segment>
+
         </div>
       </Layout>
     );
