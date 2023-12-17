@@ -17,6 +17,10 @@ contract LottogemeinschaftFabrik{
     function getGegruendeteLottogemeinschaften() public view returns (address payable[] memory) {
         return lottogemeinschaften;
     }
+
+    function getLottogemeinschaftsnamen() public view returns (string[] memory) {
+        return lottogemeinschaftsnamen;
+    }
 }
 
 contract Lottogemeinschaft {
@@ -35,6 +39,7 @@ contract Lottogemeinschaft {
     uint public anzahlLottotipps;
     mapping(address => bool) public mitspieler;
     mapping(uint => address) public mitspielerIndex; // Neues Mapping für Indexierung
+    address[] public mitspielerAddressen;
     uint public anzahlTeilnehmerAktuell;
 
     uint public gewinnBetrag = 0;
@@ -75,6 +80,7 @@ contract Lottogemeinschaft {
         // Effects
         uint ueberschuss = msg.value - erforderlicherBetrag;
         mitspieler[msg.sender] = true;
+        mitspielerIndex[anzahlTeilnehmerAktuell - 1] = msg.sender; // Speichern des Mitspielers im Index
         mitspielerAddressen.push(msg.sender);
         anzahlTeilnehmerAktuell++;
 
@@ -101,11 +107,10 @@ contract Lottogemeinschaft {
     function auszahlen() public payable restictedToGruender {
         // Checks
         uint anzahlDerMitspieler = anzahlTeilnehmerAktuell;
+        uint gewinnProPerson = address(this).balance / anzahlTeilnehmerAktuell; // Einmalige Berechnung
         require(anzahlDerMitspieler > 0, "Keine Mitspieler vorhanden");
         require(anzahlTeilnehmerAktuell == maxTeilnehmerAnzahl, "Nicht alle Mitspieler haben teilgenommen");
-        uint gewinnProPerson = address(this).balance / anzahlDerMitspieler;
         require(gewinnProPerson > 0, "Nicht genuegend Guthaben fuer Auszahlung");
-        uint gewinnProPerson = address(this).balance / anzahlTeilnehmerAktuell; // Einmalige Berechnung
 
         // Effects
         // Auszahlung in Chargen von jeweils 5 Mitspielern
@@ -124,13 +129,11 @@ contract Lottogemeinschaft {
         // Zurücksetzen nach der vollständigen Auszahlung
         if (auszahlungsIndex == anzahlDerMitspieler) {
             for (uint i = 0; i < anzahlDerMitspieler; i++) {
-                address mitspielerAdresse = mitspielerAddressen[i];
-                delete mitspieler[mitspielerAdresse];
+                delete mitspieler[mitspielerIndex[i]];
             }
-
-            delete mitspielerAddressen;
             anzahlTeilnehmerAktuell = 0;
             auszahlungsIndex = 0;
+            mitspielerAddressen = new address[](0); // Array neu initialisieren
         }
     }
 

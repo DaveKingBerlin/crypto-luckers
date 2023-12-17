@@ -17,13 +17,14 @@
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
     "semantic-ui-react": "^2.1.5",
-    "solc": "^0.8.23-fixed",
+    "solc": "^0.8.23",
     "web-vitals": "^2.1.4",
     "web3": "^4.3.0"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "node server.js",
+    "dev": "next dev",
+    "start": "next start",
+    "build": "next build",
     "test": "mocha",
     "eject": "react-scripts eject"
   },

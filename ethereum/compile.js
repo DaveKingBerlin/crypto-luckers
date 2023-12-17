@@ -24,7 +24,17 @@ const input = {
   },
 };
 
-const output = JSON.parse(solc.compile(JSON.stringify(input))).contracts['Lottogemeinschaft.sol'];
+const compiledOutput = solc.compile(JSON.stringify(input));
+console.log(JSON.parse(compiledOutput));
+
+const output = JSON.parse(compiledOutput);
+for (let contractName in output.contracts['Lottogemeinschaft.sol']) {
+  const contract = output.contracts['Lottogemeinschaft.sol'][contractName];
+  fs.outputJsonSync(
+    path.resolve(buildPath, contractName + '.json'),
+    contract
+  );
+}
 
 fs.ensureDirSync(buildPath);
 

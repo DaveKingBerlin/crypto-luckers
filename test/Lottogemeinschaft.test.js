@@ -38,4 +38,9 @@ describe("Lottogemeinschaft", () => {
     assert.equal(accounts[0], gruender);
   });
 
+  it("check Liste der Namen aller Lottogemeinschaften", async () => {
+    const lottogemeischaftsnamen = await factory.methods.getLottogemeinschaftsnamen().call();
+    assert.equal("Test", lottogemeischaftsnamen);
+  });
+
 });
