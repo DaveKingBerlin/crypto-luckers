@@ -16,11 +16,11 @@ class LottogemeinschaftIndex extends Component {
       return { lottogemeinschaften, lottogemeinschaftsnamen };
     } catch (error) {
       console.error("Fehler beim Abrufen der Daten: ", error);
-      return { lottogemeinschaften: [], lottogemeinschaftsnamen: [], details: [] };
+      return { lottogemeinschaften: [], lottogemeinschaftsnamen: []};
     }
   }
 
-  renderLottogemeinschaften() {
+  renderOffeneLottogemeinschaften() {
       const items = this.state.details.map(({ preisProPerson, mitgliederzahl, maximaleMitglieder }, index) => {
         const metaContent = mitgliederzahl < maximaleMitglieder
             ? <span style={{ color: 'green' }}>kannst noch mitmachen</span>
@@ -30,6 +30,38 @@ class LottogemeinschaftIndex extends Component {
             header: this.props.lottogemeinschaftsnamen[index],
             description: `${preisProPerson} €  ---  ${mitgliederzahl} / ${maximaleMitglieder} Mitläufer`,
             meta: metaContent,
+            fluid: false,
+        };
+      });
+      return <Card.Group items={items} />;
+  }
+
+  renderGeschlosseneLottogemeinschaften() {
+      const items = this.state.details.map(({ preisProPerson, mitgliederzahl, maximaleMitglieder }, index) => {
+        const metaContent = mitgliederzahl > maximaleMitglieder
+            ? <span style={{ color: 'green' }}>kannst noch mitmachen</span>
+            : <span style={{ color: 'red' }}>chance verpasst</span>;
+
+        return {
+            header: this.props.lottogemeinschaftsnamen[index]+"Voll!",
+            description: `${maximaleMitglieder} / ${maximaleMitglieder} Mitläufer`,
+            meta: metaContent,
+            fluid: false,
+        };
+      });
+      return <Card.Group items={items} />;
+  }
+
+  renderEigeneLottogemeinschaften() {
+      const items = this.state.details.map(({ preisProPerson, mitgliederzahl, maximaleMitglieder }, index) => {
+        const metaContent = mitgliederzahl < maximaleMitglieder
+            ? <span style={{ color: 'green' }}>kannst noch mitmachen</span>
+            : <span style={{ color: 'red' }}>chance verpasst</span>;
+
+        return {
+            header: this.props.lottogemeinschaftsnamen[index],
+            description: `${mitgliederzahl} / ${maximaleMitglieder} Mitläufer`,
+            meta: <a>bearbeiten</a>,
             fluid: false,
         };
       });
@@ -75,13 +107,45 @@ class LottogemeinschaftIndex extends Component {
             <Advertisement unit='banner' test='Hier könnte ihre Werbung stehen' style={{ width: '100%' }} />
           </Grid>
           <Segment>
-            <Label ribbon color="green" size="large">Übersicht erstellter Lottogemeinschaften</Label>
+            <Label ribbon color="green" size="large">Übersicht offener Lottogemeinschaften</Label>
             <Grid>
               <Grid.Column textAlign="center">
                 <a>
                   <Button
-                    content={this.renderLottogemeinschaften()}
+                    content={this.renderOffeneLottogemeinschaften()}
                     secondary
+                  />
+                </a>
+              </Grid.Column>
+            </Grid>
+          </Segment>
+          <Grid>
+            <Advertisement unit='banner' test='Hier könnte ihre Werbung stehen' style={{ width: '100%' }} />
+          </Grid>
+          <Segment>
+            <Label ribbon color="red" size="large">Übersicht geschlossener Lottogemeinschaften</Label>
+            <Grid>
+              <Grid.Column textAlign="center">
+                <a>
+                  <Button
+                    content={this.renderGeschlosseneLottogemeinschaften()}
+                    secondary
+                  />
+                </a>
+              </Grid.Column>
+            </Grid>
+          </Segment>
+          <Grid>
+            <Advertisement unit='banner' test='Hier könnte ihre Werbung stehen' style={{ width: '100%' }} />
+          </Grid>
+          <Segment>
+            <Label ribbon color="blue" size="large">Übersicht ihrer erstellter Lottogemeinschaften</Label>
+            <Grid>
+              <Grid.Column textAlign="center">
+                <a>
+                  <Button
+                    content={this.renderEigeneLottogemeinschaften()}
+                    primary
                   />
                 </a>
               </Grid.Column>
