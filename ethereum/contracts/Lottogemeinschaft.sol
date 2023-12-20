@@ -3,16 +3,29 @@ pragma solidity >=0.8.23 <0.9.0;
 
 contract LottogemeinschaftFabrik{
 
+    // Deklarieren von Ereignissen
+    event LottogemeinschaftGegruendet(address lottogemeinschaftAdresse, string name);
+    event FehlerBeimGruenden(string message);
+
     address payable[] public lottogemeinschaften;
     string[] public lottogemeinschaftsnamen;
     mapping(string => address) public lottogemeinschaftsnamenmapping;
 
     function gruendeLottogemeinschaft (string memory name, uint16 anzahl, uint32 preis, uint48 scheinNummer, bool mitspielerBestimmen) public {
-        address neueLottogemeinschaft = address( new Lottogemeinschaft(name, msg.sender, anzahl, preis,scheinNummer, mitspielerBestimmen));
-        lottogemeinschaften.push(payable(neueLottogemeinschaft));
-        lottogemeinschaftsnamen.push(name);
-        lottogemeinschaftsnamenmapping[name] = neueLottogemeinschaft;
-    }
+    require(bytes(name).length > 0, "Name darf nicht leer sein");
+    require(anzahl > 0, "Anzahl muss groesser als 0 sein");
+    require(anzahl < 65535, "Anzahl muss kleiner als 65535 sein");
+    require(preis > 0, "Preis muss groesser als 0 sein");
+    require(preis < 4294967295, "Preis muss kleiner als 4294967295 sein");
+    require(scheinNummer < 281474976710655, "ScheinNummer muss zwischen 0 und 281474976710655 sein");
+
+    address neueLottogemeinschaft = address(new Lottogemeinschaft(name, msg.sender, anzahl, preis, scheinNummer, mitspielerBestimmen));
+    lottogemeinschaften.push(payable(neueLottogemeinschaft));
+    lottogemeinschaftsnamen.push(name);
+    lottogemeinschaftsnamenmapping[name] = neueLottogemeinschaft;
+
+    emit LottogemeinschaftGegruendet(neueLottogemeinschaft, name);
+}
 
     function getGegruendeteLottogemeinschaften() public view returns (address payable[] memory) {
         return lottogemeinschaften;
@@ -28,9 +41,10 @@ contract Lottogemeinschaft {
     address public gruender;
     string public tippgemeinschaftsName;
     uint16 public maxTeilnehmerAnzahl;
-    uint48 public auszahlung;
     uint32 public preisLottoschein;
+    uint32 public preisProMitspieler;
     uint48 public lottoscheinNummer;
+    uint48 public auszahlung;
     mapping(address => bool) public mitspieler;
     mapping(address => bool) public gewinnAusgezahlt;
     uint16 public anzahlTeilnehmerAktuell;
@@ -40,15 +54,16 @@ contract Lottogemeinschaft {
     mapping(address => bool) erlaubteMitspieler;
     bool private locked;
 
-    constructor ( string memory name, address ersteller, uint16 anzahl, uint32 preis, uint48 scheinNummer, bool mitspielerBestimmen) {
-        require(anzahl<65535, "Maximal 65534 Mitspieler erlaubt");
-        require(preisLottoschein<4294967295, "Maximaler Preis 4294967295");
+    constructor (string memory name, address ersteller, uint16 anzahl, uint32 preis, uint48 scheinNummer, bool mitspielerBestimmen) {
+        require(anzahl < 65535, "Maximal 65534 Mitspieler erlaubt");
+        require(preis < 4294967295, "Maximaler Preis 4294967295");
         gruender = ersteller;
         tippgemeinschaftsName = name;
         maxTeilnehmerAnzahl = anzahl;
         preisLottoschein = preis;
-        nurErlaubteMitspieler=mitspielerBestimmen;
+        nurErlaubteMitspieler = mitspielerBestimmen;
         lottoscheinNummer = scheinNummer;
+        preisProMitspieler = uint32(uint256(preisLottoschein) * 1e18 / maxTeilnehmerAnzahl / 1e18); // Rückumwandlung in uint32
     }
 
     modifier restictedToGruender(){
@@ -69,9 +84,10 @@ contract Lottogemeinschaft {
     }
 
     function mitmachen() public payable {
+        preisProMitspieler= preisLottoschein / maxTeilnehmerAnzahl;
     // Checks
-        uint32 erforderlicherBetrag = preisLottoschein / maxTeilnehmerAnzahl;
-        require(msg.value >= erforderlicherBetrag, "Zu geringer Einzahlungsbetrag");
+        require(preisProMitspieler>0, "Kein Preis pro Mitspieler");
+        require(msg.value >= preisProMitspieler, "Zu geringer Einzahlungsbetrag");
         require(!mitspieler[msg.sender], "Bereits als Mitspieler registriert");
         require(anzahlTeilnehmerAktuell < maxTeilnehmerAnzahl, "Maximale Teilnehmerzahl erreicht");
         require(gewinnProMitspieler==0, "Gewinn wurde bereits eingezahlt");
@@ -79,8 +95,10 @@ contract Lottogemeinschaft {
             require(erlaubteMitspieler[msg.sender]);
         }
 
+
+
         // Effects
-        uint ueberschuss = msg.value - erforderlicherBetrag;
+        uint ueberschuss = msg.value - preisProMitspieler;
         mitspieler[msg.sender] = true;
         anzahlTeilnehmerAktuell++;
 
@@ -120,8 +138,6 @@ contract Lottogemeinschaft {
         (bool sent, ) = msg.sender.call{value: auszahlungsbetrag}("");
         require(sent, "Auszahlung des Gewinns fehlgeschlagen");
     }
-
-
 
     function preisLottoscheinAendern(uint32 neuerPreis) public restictedToGruender{
         require(anzahlTeilnehmerAktuell==0, "Es gibt bereits Mitspieler. Preisaenderung nicht mehr moeglich.");
