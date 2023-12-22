@@ -89,9 +89,18 @@ class LottogemeinschaftIndex extends Component {
     return (
       <Layout>
         <div>
+          <Segment>
           <Grid>
-          <Message info header='Willkommen bei Crypto-Luckers.' content='Crypto-Luckers ist eine  Plattform, auf der Lottospieler Lottogemeinschaften finden, erstellen und verwalten können. Haben Sie Ethereum in Ihrer Wallet? Nutzen Sie es jetzt, um sich unserer exklusiven Lottogemeinschaft anzuschließen! Bei uns können Sie ganz einfach Ihren anteiligen Preis am Lottoschein mit Ethereum bezahlen. Oder gehen sie in die vollen und gründen sie ihre eigene Lottogemeinschaft. Sammeln sie das Geld für den Lottoschein via Crypto ein und zahlen sie den Gewinn des Lottoscheins bequem wieder mit Crypto aus.' style={{ width: '100%' }} />
+          <h1>Willkommen bei Crypto-Luckers!</h1>
+          <h3>Crypto-Luckers ist eine  Plattform, auf der Lottospieler Lottogemeinschaften finden, erstellen und verwalten können.
+          <ul className="list">
+          <li>
+          Haben Sie Ethereum in Ihrer Wallet?
+          </li>
+          </ul>
+          Nutzen Sie es jetzt, um sich unserer exklusiven Lottogemeinschaft anzuschließen! Bei uns können Sie ganz einfach Ihren anteiligen Preis am Lottoschein mit Ethereum bezahlen. Oder gehen sie in die vollen und gründen sie ihre eigene Lottogemeinschaft. Sammeln sie das Geld für den Lottoschein via Crypto ein und zahlen sie den Gewinn des Lottoscheins bequem wieder mit Crypto aus. </h3>
           </Grid>
+          </Segment>
           <Segment>
             <Label ribbon color="blue" size="large">Verfügbare Aktionen</Label>
             <Grid>
@@ -107,7 +116,18 @@ class LottogemeinschaftIndex extends Component {
             </Grid>
           </Segment>
           <Grid>
-          <Message info header='Gründen Sie Ihre Eigene Ethereum-basierte Lottogemeinschaft' content='Entdecken Sie den Komfort und die Sicherheit des Sammelns und Verteilens von Lottoeinsätzen mit Ethereum. Schaffen Sie eine nahtlose, transparente Erfahrung für alle Mitglieder Ihrer Gemeinschaft. Vorteile: 1. Einfaches Sammeln und schnelle Auszahlungen mit Ethereum. 2. Vollständige Transparenz und Sicherheit bei jeder Transaktion. 3. Starten Sie in wenigen Schritten: Planen, Einladen, Sammeln und Gewinne teilen. Verwandeln Sie Ihre Leidenschaft für Lotto in eine sichere und effiziente Gemeinschaftserfahrung. Gründen Sie jetzt und führen Sie Ihre Gruppe zum Erfolg!' style={{ width: '100%' }} />
+          <div className="ui info message">
+              <div className="header">
+                Gründen Sie Ihre Eigene Ethereum-basierte Lottogemeinschaft.
+              </div>
+              <p> Entdecken Sie den Komfort und die Sicherheit des Sammelns und Verteilens von Lottoeinsätzen mit Ethereum. Schaffen Sie eine nahtlose, transparente Erfahrung für alle Mitglieder Ihrer Gemeinschaft.</p>
+              <ul className="list">
+                <li>Einfaches Sammeln und schnelle Auszahlungen mit Ethereum.</li>
+                <li>Vollständige Transparenz und Sicherheit bei jeder Transaktion.</li>
+                <li>Starten Sie in wenigen Schritten: Planen, Einladen, Sammeln und Gewinne teilen.</li>
+              </ul>
+              <p>Verwandeln Sie Ihre Leidenschaft für Lotto in eine sichere und effiziente Gemeinschaftserfahrung. Gründen Sie jetzt und führen Sie Ihre Gruppe zum Erfolg!</p>
+          </div>
           </Grid>
           <Segment>
             <Label ribbon color="green" size="large">Übersicht offener Lottogemeinschaften</Label>
@@ -123,7 +143,18 @@ class LottogemeinschaftIndex extends Component {
             </Grid>
           </Segment>
           <Grid>
-          <Message info header='Spielen sie mit einer starken Gemeinschaft.' content='Treten Sie unserer Ethereum-basierten Lottogemeinschaft bei und erleben Sie das Lotto spielen auf eine neue, innovative Weise. Nutzen Sie die Kraft der Gemeinschaft, um Ihre Chancen zu erhöhen und Gewinne zu teilen. Vorteile 1. Bequeme Teilnahme und anteilige Gewinne, direkt in Ihre Ethereum-Wallet. 2. Transparente und schnelle Transaktionen, keine versteckten Gebühren. 3. Werden Sie Teil einer Gemeinschaft, die Sicherheit und Fairness großschreibt. Nutzen Sie die Vorteile der Blockchain für Ihr Lottospiel. Schließen Sie sich jetzt an und werden Sie Teil einer Gruppe, die zusammen gewinnt!' style={{ width: '100%' }} />
+          <div className="ui info message">
+              <div className="header">
+                Spielen sie mit einer starken Gemeinschaft.
+              </div>
+              <p> Treten Sie unserer Ethereum-basierten Lottogemeinschaft bei und erleben Sie das Lotto spielen auf eine neue, innovative Weise. Nutzen Sie die Kraft der Gemeinschaft, um Ihre Chancen zu erhöhen und Gewinne zu teilen.</p>
+              <ul className="list">
+                <li>Bequeme Teilnahme und anteilige Gewinne, direkt in Ihre Ethereum-Wallet.</li>
+                <li>Transparente und schnelle Transaktionen, keine versteckten Gebühren.</li>
+                <li>Werden Sie Teil einer Gemeinschaft, die Sicherheit und Fairness großschreibt.</li>
+              </ul>
+              <p>Nutzen Sie die Vorteile der Blockchain für Ihr Lottospiel. Schließen Sie sich jetzt an und werden Sie Teil einer Gruppe, die zusammen gewinnt!</p>
+          </div>
           </Grid>
           <Segment>
             <Label ribbon color="red" size="large">Übersicht geschlossener Lottogemeinschaften</Label>
@@ -139,7 +170,18 @@ class LottogemeinschaftIndex extends Component {
             </Grid>
           </Segment>
           <Grid>
-          <Message info header='Neugierig wer wieviel gewonnen hat?' content='Möchten Sie mehr darüber erfahren, wie unsere Ethereum-basierte Lottogemeinschaft funktioniert und wie Gewinne verteilt werden? Hier finden Sie transparente Einblicke und aktuelle Informationen. Erfahren Sie, wie Gewinne fair und transparent unter den Mitgliedern aufgeteilt werden. Sehen Sie echte Beispiele von Gewinnen und deren Verteilung in der Gemeinschaft. Verstehen Sie die Vorteile der Blockchain-Technologie im Lotto. Bleiben Sie informiert und entdecken Sie, wie unsere Gemeinschaft durch Transparenz und Zusammenarbeit stärker wird. Ihre Neugier könnte der erste Schritt zu einer neuen Art des Lottospiels sein!' style={{ width: '100%' }} />
+           <div className="ui info message">
+              <div className="header">
+                Neugierig wer was gewonnen hat?
+              </div>
+              <p>Möchten Sie mehr darüber erfahren, wie unsere Ethereum-basierte Lottogemeinschaft funktioniert und wie Gewinne verteilt werden?</p>
+          <ul className="list">
+          <li>Hier finden Sie transparente Einblicke und aktuelle Informationen.</li>
+          <li>Erfahren Sie, wie Gewinne fair und transparent unter den Mitgliedern aufgeteilt werden.</li>
+          <li>Sehen Sie echte Beispiele von Gewinnen und deren Verteilung in der Gemeinschaft.</li>
+           </ul>
+          <p>Verstehen Sie die Vorteile der Blockchain-Technologie im Lotto. Bleiben Sie informiert und entdecken Sie, wie unsere Gemeinschaft durch Transparenz und Zusammenarbeit stärker wird. Ihre Neugier könnte der erste Schritt zu einer neuen Art des Lottospiels sein!</p>
+          </div>
           </Grid>
           <Segment>
             <Label ribbon color="blue" size="large">Übersicht ihrer erstellter Lottogemeinschaften</Label>
@@ -155,7 +197,7 @@ class LottogemeinschaftIndex extends Component {
             </Grid>
           </Segment>
           <Grid>
-          <Message info header='Verwalten Sie Ihre Lottogemeinschaft effizient und transparent' content='Als Gründer einer Ethereum-basierten Lottogemeinschaft haben Sie die Kontrolle und die Verantwortung, alles reibungslos laufen zu lassen. Hier sind die Werkzeuge und Informationen, die Sie benötigen, um Ihre Gemeinschaft effektiv zu verwalten. Überwachen Sie Einzahlungen und Auszahlungen in Echtzeit über die Blockchain. Passen Sie die Regeln an, setzen Sie Mindest- und Höchstbeträge fest und laden Sie neue Mitglieder ein. Kommunizieren Sie transparent mit Mitgliedern über Änderungen und Gewinnverteilungen. Mit den richtigen Werkzeugen und einem klaren Überblick über Ihre Gemeinschaft können Sie eine faire, unterhaltsame und gewinnbringende Lottogemeinschaft führen. Nutzen Sie die Macht der Ethereum-Blockchain, um alles effizient zu verwalten!' style={{ width: '100%' }} />
+          <Message info header='Verwalten Sie Ihre Lottogemeinschaft effizient und transparent.' content='Als Gründer einer Ethereum-basierten Lottogemeinschaft haben Sie die Kontrolle und die Verantwortung, alles reibungslos laufen zu lassen. Hier sind die Werkzeuge und Informationen, die Sie benötigen, um Ihre Gemeinschaft effektiv zu verwalten. Überwachen Sie Einzahlungen und Auszahlungen in Echtzeit über die Blockchain. Passen Sie die Regeln an, setzen Sie Mindest- und Höchstbeträge fest und laden Sie neue Mitglieder ein. Kommunizieren Sie transparent mit Mitgliedern über Änderungen und Gewinnverteilungen. Mit den richtigen Werkzeugen und einem klaren Überblick über Ihre Gemeinschaft können Sie eine faire, unterhaltsame und gewinnbringende Lottogemeinschaft führen. Nutzen Sie die Macht der Ethereum-Blockchain, um alles effizient zu verwalten!' style={{ width: '100%' }} />
           </Grid>
         </div>
       </Layout>
