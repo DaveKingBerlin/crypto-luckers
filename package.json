@@ -13,6 +13,7 @@
     "ganache": "^7.9.1",
     "mocha": "^10.2.0",
     "next": "^12.3.4",
+    "next-routes": "^1.4.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",

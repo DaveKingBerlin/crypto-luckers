@@ -3,6 +3,7 @@ import { Segment, Card, Button, Label, Sticky, Grid, Container, Message } from "
 import factory from "../ethereum/fabrik";
 import Layout from "../components/Layout";
 import Lottogemeinschaft from '../ethereum/lottogemeinschaft';
+import Link from 'next/link';
 
 class LottogemeinschaftIndex extends Component {
   state = {
@@ -105,13 +106,15 @@ class LottogemeinschaftIndex extends Component {
             <Label ribbon color="blue" size="large">Verfügbare Aktionen</Label>
             <Grid>
               <Grid.Column textAlign="center">
-                <a>
-                  <Button
-                    content="Gründe neue Lottogemeinschaft"
-                    icon="add circle"
-                    primary
-                  />
-                </a>
+              <Link href="/lottogemeinschaften/neu">
+                  <a>
+                    <Button
+                      content="Gründe neue Lottogemeinschaft"
+                      icon="add circle"
+                      primary
+                    />
+                  </a>
+              </Link>
               </Grid.Column>
             </Grid>
           </Segment>
