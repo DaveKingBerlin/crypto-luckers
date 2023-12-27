@@ -20,9 +20,14 @@ class LottogemeinschaftVerwalten extends Component {
   static async getInitialProps({ query }) {
 
     const { tippgemeinschaftsName } = query;
+    const lottogemeinschaftAddress = await factory.methods.lottogemeinschaftsnamenmapping(query.tippgemeinschaftsName).call();
+    const lottogemeinschaft = Lottogemeinschaft(lottogemeinschaftAddress);
+    const gruender = await lottogemeinschaft.methods.gruender().call();
+    const maxTeilnehmerAnzahl = (await lottogemeinschaft.methods.maxTeilnehmerAnzahl().call()).toString();
+    const preisLottoschein  = (await lottogemeinschaft.methods.preisLottoschein().call()).toString();
 
     return {
-          tippgemeinschaftsName
+          tippgemeinschaftsName, gruender, maxTeilnehmerAnzahl, preisLottoschein
     };
   }
 
@@ -32,16 +37,19 @@ class LottogemeinschaftVerwalten extends Component {
     const lottogemeinschaft = Lottogemeinschaft(lottogemeinschaftAddress);
 
     const gruender = await lottogemeinschaft.methods.gruender().call();
-    const maxTeilnehmerAnzahl = await lottogemeinschaft.methods.maxTeilnehmerAnzahl().call();
-    const preisLottoschein  = await lottogemeinschaft.methods.preisLottoschein().call();
-    const preisProMitspieler = await lottogemeinschaft.methods.preisProMitspieler().call();
+    const maxTeilnehmerAnzahl = (await lottogemeinschaft.methods.maxTeilnehmerAnzahl().call()).toString();
+    const preisLottoschein  = (await lottogemeinschaft.methods.preisLottoschein().call()).toString();
+    const preisProMitspieler = (await lottogemeinschaft.methods.preisProMitspieler().call()).toString();
     const spielauftragsNummer = await lottogemeinschaft.methods.spielauftragsNummer().call();
-
-    const anzahlTeilnehmerAktuell = await lottogemeinschaft.methods.anzahlTeilnehmerAktuell().call();
-    const gewinnProMitspieler = await lottogemeinschaft.methods.gewinnProMitspieler().call();
+    const anzahlTeilnehmerAktuell = (await lottogemeinschaft.methods.anzahlTeilnehmerAktuell().call()).toString();
+    const gewinnProMitspieler = (await lottogemeinschaft.methods.gewinnProMitspieler().call()).toString();
     const kannGewinnAbgeholtWerden = await lottogemeinschaft.methods.kannGewinnAbgeholtWerden().call();
     const nurErlaubteMitspieler = await lottogemeinschaft.methods.nurErlaubteMitspieler().call();
-    const auszahlung = web3.utils.fromWei(await lottogemeinschaft.methods.auszahlung().call(), "ether");
+    const auszahlung = (web3.utils.fromWei(await lottogemeinschaft.methods.auszahlung().call(), "ether")).toString();
+
+    console.log("Gründer: ", gruender)
+    console.log("maxTeilnehmerAnzahl: ", maxTeilnehmerAnzahl)
+    console.log("preisLottoschein: ", preisLottoschein)
 
     this.setState({ gruender, maxTeilnehmerAnzahl, preisLottoschein, spielauftragsNummer, anzahlTeilnehmerAktuell, gewinnProMitspieler, kannGewinnAbgeholtWerden, nurErlaubteMitspieler, auszahlung: auszahlung.toString()});
 
@@ -56,11 +64,6 @@ class LottogemeinschaftVerwalten extends Component {
         console.error("Keine Metamask-Adresse gefunden.");
         // Hier könntest du weiteren Code hinzufügen, um mit dem Fall umzugehen, dass keine Adressen gefunden wurden.
         // Zum Beispiel könntest du einen Zustand in deiner Komponente setzen, um dem Benutzer eine entsprechende Nachricht anzuzeigen.
-    }
-
-    if (accounts.length !== 0) {
-      console.error("Keine Metamask-Adresse gefunden.");
-      return; // Frühzeitige Rückkehr, wenn keine Adresse gefunden wird
     }
   }
 
