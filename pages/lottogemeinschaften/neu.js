@@ -29,7 +29,7 @@ class LottogemeinschaftNeu extends Component {
           from: accounts[0],
         });
 
-      Router.push(`/lottogemeinschaften/${this.state.tippgemeinschaftsName}/verwalten`);
+      Router.push(`/lottogemeinschaften/${this.state.tippgemeinschaftsName}`);
 
     } catch (err) {
       this.setState({ errorMessage: err.message });

@@ -52,7 +52,7 @@ contract Lottogemeinschaft {
     uint48 public gewinnProMitspieler = 0;
     bool public kannGewinnAbgeholtWerden=false;
     bool public nurErlaubteMitspieler=false;
-    mapping(address => bool) erlaubteMitspieler;
+    mapping(address => bool) public erlaubterMitspieler;
     bool private locked;
 
     constructor (string memory name, address ersteller, uint16 anzahl, uint32 preis, string memory scheinNummer, bool mitspielerBestimmen) {
@@ -94,7 +94,7 @@ contract Lottogemeinschaft {
         require(anzahlTeilnehmerAktuell < maxTeilnehmerAnzahl, "Maximale Teilnehmerzahl erreicht");
         require(gewinnProMitspieler==0, "Gewinn wurde bereits eingezahlt");
         if (nurErlaubteMitspieler){
-            require(erlaubteMitspieler[msg.sender]);
+            require(erlaubterMitspieler[msg.sender]);
         }
 
 
@@ -153,9 +153,10 @@ contract Lottogemeinschaft {
         maxTeilnehmerAnzahl = neueAnzahlMaxTeilnehmer;
     }
 
-    function erlaubteMitspielerAdresseHinzufuegen(address erlaubterMitspieler) public restictedToGruender{
-         require(anzahlTeilnehmerAktuell==0, "Es gibt bereits Mitspieler. Aenderung nicht mehr moeglich.");
-         erlaubteMitspieler[erlaubterMitspieler] = true;
+    function erlaubteMitspielerAdresseHinzufuegen(address _erlaubterMitspieler) public restictedToGruender{
+        require(anzahlTeilnehmerAktuell==0, "Es gibt bereits Mitspieler. Aenderung nicht mehr moeglich.");
+        erlaubterMitspieler[_erlaubterMitspieler] = true;
     }
+
 
 }
