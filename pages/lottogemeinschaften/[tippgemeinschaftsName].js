@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Card, Grid, Button } from "semantic-ui-react";
+import { Card, Grid } from "semantic-ui-react";
 import Layout from "../../components/Layout";
 import Lottogemeinschaft from "../../ethereum/lottogemeinschaft";
 import factory from "../../ethereum/fabrik";
@@ -7,7 +7,6 @@ import web3 from "../../ethereum/web3";
 import { Link } from "../../routes";
 
 class LottogemeinschaftVerwalten extends Component {
-
   state = {
     userAddress: "",
     istMitspieler: false,
@@ -18,7 +17,6 @@ class LottogemeinschaftVerwalten extends Component {
   };
 
   static async getInitialProps({ query }) {
-
     const { tippgemeinschaftsName } = query;
     const lottogemeinschaftAddress = await factory.methods.lottogemeinschaftsnamenmapping(query.tippgemeinschaftsName).call();
     const lottogemeinschaft = Lottogemeinschaft(lottogemeinschaftAddress);
@@ -27,7 +25,7 @@ class LottogemeinschaftVerwalten extends Component {
     const preisLottoschein  = (await lottogemeinschaft.methods.preisLottoschein().call()).toString();
 
     return {
-          tippgemeinschaftsName, gruender, maxTeilnehmerAnzahl, preisLottoschein
+      tippgemeinschaftsName, gruender, maxTeilnehmerAnzahl, preisLottoschein
     };
   }
 
@@ -73,63 +71,50 @@ class LottogemeinschaftVerwalten extends Component {
       gruender,
       maxTeilnehmerAnzahl,
       preisLottoschein,
-      spielauftragsNummer,
       auszahlung,
-      istMitspieler,
-      istGewinnAusgezahlt,
-      anzahlTeilnehmerAktuell,
-      kannGewinnAbgeholtWerden,
-      nurErlaubteMitspieler,
-      istErlaubterMitspieler
+      // ... andere Zustände
     } = this.props;
 
     const items = [
       {
-        header: this.props.tippgemeinschaftsName || "",
+        header: tippgemeinschaftsName || "",
         meta: "tippgemeinschaftsName",
-        description:
-          "",
+        description: "",
         style: { overflowWrap: "break-word" },
       },
       {
-        header: this.props.gruender || "",
+        header: gruender || "",
         meta: "gruender",
-        description:
-          "",
+        description: "",
       },
       {
-        header: this.props.maxTeilnehmerAnzahl || "",
+        header: maxTeilnehmerAnzahl || "",
         meta: "maxTeilnehmerAnzahl",
-        description:
-          "",
+        description: "",
       },
       {
-        header: this.props.preisLottoschein || "",
+        header: preisLottoschein || "",
         meta: "preisLottoschein",
-        description:
-          "",
+        description: "",
       },
       {
-        header: this.props.auszahlung ? web3.utils.fromWei(this.props.auszahlung, "ether") : "Lädt...",
+        header: auszahlung ? web3.utils.fromWei(auszahlung, "ether") : "Lädt...",
         meta: "auszahlung",
         description: ""
-        // ...
       },
+      // ... füge weitere Karten hinzu wie benötigt
     ];
 
-    return <Card.Group items={items} />;
+    return <Card.Group items={items} itemsPerRow={1} />;
   }
 
   render() {
     return (
       <Layout>
-        <h3>Lottogemeinschaftsverwaltung</h3>
+        <h3>Lottogemeinschaftsverwalten</h3>
         <Grid>
           <Grid.Row>
-            <Grid.Column width={10}>{this.renderCards()}</Grid.Column>
-            <Grid.Column width={6}>
-              <h3>Address: {this.props.address}</h3>
-            </Grid.Column>
+            <Grid.Column width={16}>{this.renderCards()}</Grid.Column>
           </Grid.Row>
         </Grid>
       </Layout>
