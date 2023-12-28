@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Card, Grid } from "semantic-ui-react";
+import { Card, Grid, Button, Form, Input } from "semantic-ui-react";
 import Layout from "../../components/Layout";
 import Lottogemeinschaft from "../../ethereum/lottogemeinschaft";
 import factory from "../../ethereum/fabrik";
@@ -13,7 +13,17 @@ class LottogemeinschaftVerwalten extends Component {
     istGewinnAusgezahlt: false,
     istErlaubterMitspieler: true,
     auszahlung: "0", // oder null, abhängig von deinem bevorzugten Anfangswert
-    // ... andere Zustände
+    lottogemeinschaftAddress:null,
+    lottogemeinschaft: null,
+    gruender: null,
+    maxTeilnehmerAnzahl: 0,
+    preisLottoschein: 0,
+    preisProMitspieler: 0,
+    spielauftragsNummer: 0,
+    anzahlTeilnehmerAktuell: 0,
+    gewinnProMitspieler: 0,
+    auszahlung: 0,
+
   };
 
   static async getInitialProps({ query }) {
@@ -45,10 +55,6 @@ class LottogemeinschaftVerwalten extends Component {
     const nurErlaubteMitspieler = await lottogemeinschaft.methods.nurErlaubteMitspieler().call();
     const auszahlung = (web3.utils.fromWei(await lottogemeinschaft.methods.auszahlung().call(), "ether")).toString();
 
-    console.log("Gründer: ", gruender)
-    console.log("maxTeilnehmerAnzahl: ", maxTeilnehmerAnzahl)
-    console.log("preisLottoschein: ", preisLottoschein)
-
     this.setState({ gruender, maxTeilnehmerAnzahl, preisLottoschein, spielauftragsNummer, anzahlTeilnehmerAktuell, gewinnProMitspieler, kannGewinnAbgeholtWerden, nurErlaubteMitspieler, auszahlung: auszahlung.toString()});
 
     const accounts = await web3.eth.getAccounts();
@@ -64,6 +70,26 @@ class LottogemeinschaftVerwalten extends Component {
         // Zum Beispiel könntest du einen Zustand in deiner Komponente setzen, um dem Benutzer eine entsprechende Nachricht anzuzeigen.
     }
   }
+
+  preisAendernHandler = async () => {
+      const { neuerPreis } = this.state;
+      // Verwenden Sie web3 und Ihren Contract, um den Preis zu aktualisieren.
+      await this.lottogemeinschaft.methods.preisLottoscheinAendern(neuerPreis).send({ from: userAddress });
+    };
+
+  anzahlMitspielerAendernHandler = async () => {
+      const { neueAnzahlMitspieler } = this.state;
+      await this.lottogemeinschaft.methods.anzahlMitspielerAendern(neueAnzahlMitspieler).send({ from: userAddress });
+  };
+
+  erlaubteMitspielerHinzufuegenHandler = async () => {
+      const { erlaubterMitspieler } = this.state;
+      await this.lottogemeinschaft.methods.erlaubteMitspielerAdresseHinzufuegen(erlaubterMitspieler).send({ from: userAddress });
+  };
+
+  gemeinschaftAufloesenHandler = async () => {
+      await this.lottogemeinschaft.methods.gemeinschaftAufloesen().send({ from: userAddress });
+  };
 
   renderCards() {
     const {
@@ -108,6 +134,54 @@ class LottogemeinschaftVerwalten extends Component {
     return <Card.Group items={items} itemsPerRow={1} />;
   }
 
+  renderButtons() {
+      const { userAddress, gruender, nurErlaubteMitspieler } = this.state;
+
+      if (userAddress === gruender) {
+        return (
+          <Grid.Row>
+            <Grid.Column width={16}>
+              <Form>
+                <Form.Field>
+                  <label>Neuer Preis</label>
+                  <Input
+                    placeholder='Preis in Euro'
+                    onChange={event => this.setState({ neuerPreis: event.target.value })}
+                  />
+                  <Button onClick={this.preisAendernHandler}>Aktualisieren</Button>
+                </Form.Field>
+
+                <Form.Field>
+                  <label>Neue Anzahl der Mitspieler</label>
+                  <Input
+                    placeholder='Anzahl der Mitspieler'
+                    onChange={event => this.setState({ neueAnzahlMitspieler: event.target.value })}
+                  />
+                  <Button onClick={this.anzahlMitspielerAendernHandler}>Aktualisieren</Button>
+                </Form.Field>
+
+                {nurErlaubteMitspieler && (
+                  <Form.Field>
+                    <label>Erlaubte Adresse hinzufügen</label>
+                    <Input
+                      placeholder='Adresse'
+                      onChange={event => this.setState({ erlaubteAdresse: event.target.value })}
+                    />
+                    <Button onClick={this.erlaubteMitspielerHinzufuegenHandler}>Hinzufügen</Button>
+                  </Form.Field>
+                )}
+              </Form>
+
+              <Button onClick={this.gemeinschaftAufloesenHandler} color="red">Gemeinschaft auflösen</Button>
+            </Grid.Column>
+          </Grid.Row>
+        );
+      }
+
+      return null; // Nichts rendern, wenn der Benutzer nicht der Gründer ist
+    }
+
+
   render() {
     return (
       <Layout>
@@ -116,6 +190,7 @@ class LottogemeinschaftVerwalten extends Component {
           <Grid.Row>
             <Grid.Column width={16}>{this.renderCards()}</Grid.Column>
           </Grid.Row>
+          {this.renderButtons()}
         </Grid>
       </Layout>
     );

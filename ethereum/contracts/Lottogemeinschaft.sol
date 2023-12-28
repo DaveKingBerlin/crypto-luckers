@@ -158,5 +158,25 @@ contract Lottogemeinschaft {
         erlaubterMitspieler[_erlaubterMitspieler] = true;
     }
 
+    // Funktion zum Auflösen der Lottogemeinschaft und zur Rückzahlung der Einzahlungen
+    function gemeinschaftAufloesen() public restictedToGruender {
+        require(kannGewinnAbgeholtWerden == false, "Gewinn muss noch ausgezahlt werden");
+
+        // Rückzahlung der Einzahlungen an alle registrierten Mitspieler
+        uint rueckzahlungsbetrag = preisProMitspieler;
+        for (uint i = 0; i < lottogemeinschaften.length; i++) {
+            address payable mitspielerAdresse = lottogemeinschaften[i];
+
+            // Sicherstellen, dass nur diejenigen bezahlt werden, die noch keinen Gewinn erhalten haben
+            if (!gewinnAusgezahlt[mitspielerAdresse]) {
+                (bool sent, ) = mitspielerAdresse.call{value: rueckzahlungsbetrag}("");
+                require(sent, "Rueckzahlung an Mitspieler fehlgeschlagen");
+            }
+        }
+
+        // Selbstzerstörung des Vertrags, um alle verbleibenden Mittel an den Gründer zurückzusenden und den Vertrag zu deaktivieren
+        selfdestruct(payable(gruender));
+    }
+
 
 }
