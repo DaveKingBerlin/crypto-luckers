@@ -82,7 +82,10 @@ class LottogemeinschaftIndex extends Component {
 
 
   renderVerwalteLottogemeinschaften() {
-      const items = this.state.details.map(({ preisProPerson, mitgliederzahl, maximaleMitglieder }, index) => {
+      // Annahme: userAddress ist die Wallet-Adresse des aktuellen Benutzers
+      const userAddress = this.state.userAddress;
+
+      const items = this.state.details.map(({ preisProPerson, mitgliederzahl, maximaleMitglieder, gruenderWallet }, index) => {
         const metaContent = mitgliederzahl < maximaleMitglieder
             ? <span style={{ color: 'orange' }}>verwalten</span>
             : <span style={{ color: 'blue' }}>weitere Aktionen</span>;
@@ -97,7 +100,7 @@ class LottogemeinschaftIndex extends Component {
                 {metaContent} {/* Fügen Sie metaContent direkt als JSX-Element ein */}
               </div>
             ),
-            meta: (
+            meta: userAddress === gruenderWallet && (
               <a onClick={() => Router.push(`/lottogemeinschaften/${tippgemeinschaftsName}`)}>
                 bearbeiten
               </a>),
@@ -105,9 +108,7 @@ class LottogemeinschaftIndex extends Component {
         };
       });
       return <Card.Group items={items} />;
-  }
-
-
+    }
 
   async componentDidMount() {
       const details = await Promise.all(
@@ -116,6 +117,7 @@ class LottogemeinschaftIndex extends Component {
           const preisProPerson = await lottogemeinschaft.methods.preisProMitspieler().call();
           const mitgliederzahl = await lottogemeinschaft.methods.anzahlTeilnehmerAktuell().call();
           const maximaleMitglieder = await lottogemeinschaft.methods.maxTeilnehmerAnzahl().call();
+          const gruenderWallet = await lottogemeinschaft.methods.gruender().call();
           return { preisProPerson, mitgliederzahl, maximaleMitglieder };
         })
       );
