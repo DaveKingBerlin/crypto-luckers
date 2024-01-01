@@ -118,7 +118,6 @@ class LottogemeinschaftIndex extends Component {
           const mitgliederzahl = await lottogemeinschaft.methods.anzahlTeilnehmerAktuell().call();
           const maximaleMitglieder = await lottogemeinschaft.methods.maxTeilnehmerAnzahl().call();
           const gruenderWallet = await lottogemeinschaft.methods.gruender().call();
-          console.log(gruenderWallet);
           return { preisProPerson, mitgliederzahl, maximaleMitglieder };
         })
       );

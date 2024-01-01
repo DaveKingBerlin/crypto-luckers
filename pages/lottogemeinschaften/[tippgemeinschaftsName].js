@@ -30,12 +30,12 @@ class LottogemeinschaftVerwalten extends Component {
     const { tippgemeinschaftsName } = query;
     const lottogemeinschaftAddress = await factory.methods.lottogemeinschaftsnamenmapping(query.tippgemeinschaftsName).call();
     const lottogemeinschaft = Lottogemeinschaft(lottogemeinschaftAddress);
-    const gruender = await lottogemeinschaft.methods.gruender().call().toString();
+    const gruender = await lottogemeinschaft.methods.gruender().call();
     const maxTeilnehmerAnzahl = (await lottogemeinschaft.methods.maxTeilnehmerAnzahl().call()).toString();
     const preisLottoschein  = (await lottogemeinschaft.methods.preisLottoschein().call()).toString();
 
     return {
-      tippgemeinschaftsName, gruender, maxTeilnehmerAnzahl, preisLottoschein, lottogemeinschaft
+      tippgemeinschaftsName, gruender, maxTeilnehmerAnzahl, preisLottoschein, lottogemeinschaftAddress
     };
   }
 
@@ -44,7 +44,7 @@ class LottogemeinschaftVerwalten extends Component {
     const lottogemeinschaftAddress = await factory.methods.lottogemeinschaftsnamenmapping(this.props.tippgemeinschaftsName).call();
     const lottogemeinschaft = Lottogemeinschaft(lottogemeinschaftAddress);
 
-    const gruender = await lottogemeinschaft.methods.gruender().call().toString();
+    const gruender = await lottogemeinschaft.methods.gruender().call();
     const maxTeilnehmerAnzahl = (await lottogemeinschaft.methods.maxTeilnehmerAnzahl().call()).toString();
     const preisLottoschein  = (await lottogemeinschaft.methods.preisLottoschein().call()).toString();
     const preisProMitspieler = (await lottogemeinschaft.methods.preisProMitspieler().call()).toString();
@@ -63,7 +63,7 @@ class LottogemeinschaftVerwalten extends Component {
         const istMitspieler = await lottogemeinschaft.methods.mitspieler(userAddress).call();
         const istGewinnAusgezahlt = await lottogemeinschaft.methods.gewinnAusgezahlt(userAddress).call();
         const istErlaubterMitspieler = await lottogemeinschaft.methods.erlaubterMitspieler(userAddress).call();
-        this.setState({ userAddress, istMitspieler, istGewinnAusgezahlt, istErlaubterMitspieler });
+        this.setState({ userAddress, istMitspieler, istGewinnAusgezahlt, istErlaubterMitspieler, lottogemeinschaftAddress });
     } else {
         console.error("Keine Metamask-Adresse gefunden.");
         // Hier könntest du weiteren Code hinzufügen, um mit dem Fall umzugehen, dass keine Adressen gefunden wurden.
@@ -71,30 +71,33 @@ class LottogemeinschaftVerwalten extends Component {
     }
   }
 
-  mitmachHandler = async () => {
-      const { deinAnteil } = this.state;
-      // Verwenden Sie web3 und Ihren Contract, um den Preis zu aktualisieren.
+  mitmachHandler = async (lottogemeinschaftAddress) => {
+      const { deinAnteil, userAddress  } = this.state;
+      const lottogemeinschaft = Lottogemeinschaft(lottogemeinschaftAddress);
       await lottogemeinschaft.methods.mitmachen().send({ from: userAddress });
     };
 
 
-  preisAendernHandler = async () => {
-      const { neuerPreis } = this.state;
-      // Verwenden Sie web3 und Ihren Contract, um den Preis zu aktualisieren.
+  preisAendernHandler = async (lottogemeinschaftAddress) => {
+      const { neuerPreis, userAddress } = this.state;
+      const lottogemeinschaft = Lottogemeinschaft(lottogemeinschaftAddress);
       await lottogemeinschaft.methods.preisLottoscheinAendern(neuerPreis).send({ from: userAddress });
     };
 
-  anzahlMitspielerAendernHandler = async () => {
-      const { neueAnzahlMitspieler } = this.state;
+  anzahlMitspielerAendernHandler = async (lottogemeinschaftAddress) => {
+      const { neueAnzahlMitspieler, userAddress } = this.state;
+      const lottogemeinschaft = Lottogemeinschaft(lottogemeinschaftAddress);
       await lottogemeinschaft.methods.anzahlMitspielerAendern(neueAnzahlMitspieler).send({ from: userAddress });
   };
 
-  erlaubteMitspielerHinzufuegenHandler = async () => {
-      const { erlaubterMitspieler } = this.state;
+  erlaubteMitspielerHinzufuegenHandler = async (lottogemeinschaftAddress) => {
+      const { erlaubterMitspieler, userAddress } = this.state;
+      const lottogemeinschaft = Lottogemeinschaft(lottogemeinschaftAddress);
       await lottogemeinschaft.methods.erlaubteMitspielerAdresseHinzufuegen(erlaubterMitspieler).send({ from: userAddress });
   };
 
-  gemeinschaftAufloesenHandler = async () => {
+  gemeinschaftAufloesenHandler = async (lottogemeinschaftAddress) => {
+      const lottogemeinschaft = Lottogemeinschaft(lottogemeinschaftAddress);
       await lottogemeinschaft.methods.gemeinschaftAufloesen().send({ from: userAddress });
   };
 
@@ -142,7 +145,7 @@ class LottogemeinschaftVerwalten extends Component {
   }
 
   renderButtons() {
-      const { userAddress, gruender, nurErlaubteMitspieler, preisProMitspieler } = this.state;
+      const { userAddress, gruender, nurErlaubteMitspieler, preisProMitspieler, lottogemeinschaftAddress } = this.state;
 
       if (userAddress === gruender) {
         return (
@@ -152,10 +155,10 @@ class LottogemeinschaftVerwalten extends Component {
                  <Form.Field>
                   <label>Mitmachen</label>
                   <Input
-                    placeholder='2.50€'
+                    placeholder='0.0001'
                     onChange={event => this.setState({ deinAnteil: event.target.value })}
                   />
-                  <Button onClick={this.mitmachHandler}>Mitmachen</Button>
+                  <Button onClick={() => this.mitmachHandler(lottogemeinschaftAddress)}>Mitmachen</Button>
                 </Form.Field>
 
                 <Form.Field>
@@ -164,7 +167,7 @@ class LottogemeinschaftVerwalten extends Component {
                     placeholder='Preis in Euro'
                     onChange={event => this.setState({ neuerPreis: event.target.value })}
                   />
-                  <Button onClick={this.preisAendernHandler}>Aktualisieren</Button>
+                  <Button onClick={() => this.preisAendernHandler(lottogemeinschaftAddress)}>Aktualisieren</Button>
                 </Form.Field>
 
                 <Form.Field>
@@ -173,7 +176,7 @@ class LottogemeinschaftVerwalten extends Component {
                     placeholder='Anzahl der Mitspieler'
                     onChange={event => this.setState({ neueAnzahlMitspieler: event.target.value })}
                   />
-                  <Button onClick={this.anzahlMitspielerAendernHandler}>Aktualisieren</Button>
+                  <Button onClick={() => this.anzahlMitspielerAendernHandler(lottogemeinschaftAddress)}>Aktualisieren</Button>
                 </Form.Field>
 
                 {nurErlaubteMitspieler && (
@@ -183,12 +186,12 @@ class LottogemeinschaftVerwalten extends Component {
                       placeholder='Adresse'
                       onChange={event => this.setState({ erlaubteAdresse: event.target.value })}
                     />
-                    <Button onClick={this.erlaubteMitspielerHinzufuegenHandler}>Hinzufügen</Button>
+                    <Button onClick={() => this.erlaubteMitspielerHinzufuegenHandler(lottogemeinschaftAddress)}>Hinzufügen</Button>
                   </Form.Field>
                 )}
               </Form>
 
-              <Button onClick={this.gemeinschaftAufloesenHandler} color="red">Gemeinschaft auflösen</Button>
+              <Button onClick={() => this.gemeinschaftAufloesenHandler(lottogemeinschaftAddress)} color="red">Gemeinschaft auflösen</Button>
             </Grid.Column>
           </Grid.Row>
         );
