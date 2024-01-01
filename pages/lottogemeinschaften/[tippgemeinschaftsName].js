@@ -35,7 +35,7 @@ class LottogemeinschaftVerwalten extends Component {
     const preisLottoschein  = (await lottogemeinschaft.methods.preisLottoschein().call()).toString();
 
     return {
-      tippgemeinschaftsName, gruender, maxTeilnehmerAnzahl, preisLottoschein
+      tippgemeinschaftsName, gruender, maxTeilnehmerAnzahl, preisLottoschein, lottogemeinschaftAddress
     };
   }
 
@@ -55,7 +55,7 @@ class LottogemeinschaftVerwalten extends Component {
     const nurErlaubteMitspieler = await lottogemeinschaft.methods.nurErlaubteMitspieler().call();
     const auszahlung = (web3.utils.fromWei(await lottogemeinschaft.methods.auszahlung().call(), "ether")).toString();
 
-    this.setState({ gruender, maxTeilnehmerAnzahl, preisLottoschein, spielauftragsNummer, anzahlTeilnehmerAktuell, gewinnProMitspieler, kannGewinnAbgeholtWerden, nurErlaubteMitspieler, auszahlung: auszahlung.toString()});
+    this.setState({ lottogemeinschaftAddress : lottogemeinschaftAddress.toString(), lottogemeinschaft, gruender, maxTeilnehmerAnzahl, preisLottoschein, spielauftragsNummer, anzahlTeilnehmerAktuell, gewinnProMitspieler, kannGewinnAbgeholtWerden, nurErlaubteMitspieler, auszahlung: auszahlung.toString()});
 
     const accounts = await web3.eth.getAccounts();
     if (accounts.length !== 0) { // Wenn es mindestens ein Konto gibt
@@ -63,7 +63,7 @@ class LottogemeinschaftVerwalten extends Component {
         const istMitspieler = await lottogemeinschaft.methods.mitspieler(userAddress).call();
         const istGewinnAusgezahlt = await lottogemeinschaft.methods.gewinnAusgezahlt(userAddress).call();
         const istErlaubterMitspieler = await lottogemeinschaft.methods.erlaubterMitspieler(userAddress).call();
-        this.setState({ userAddress, istMitspieler, istGewinnAusgezahlt, istErlaubterMitspieler });
+        this.setState({ userAddress, istMitspieler, istGewinnAusgezahlt, istErlaubterMitspieler, lottogemeinschaftAddress });
     } else {
         console.error("Keine Metamask-Adresse gefunden.");
         // Hier könntest du weiteren Code hinzufügen, um mit dem Fall umzugehen, dass keine Adressen gefunden wurden.
@@ -71,24 +71,34 @@ class LottogemeinschaftVerwalten extends Component {
     }
   }
 
-  preisAendernHandler = async () => {
-      const { neuerPreis } = this.state;
-      // Verwenden Sie web3 und Ihren Contract, um den Preis zu aktualisieren.
-      await this.lottogemeinschaft.methods.preisLottoscheinAendern(neuerPreis).send({ from: userAddress });
+  mitmachHandler = async (lottogemeinschaftAddress) => {
+      const { deinAnteil, userAddress  } = this.state;
+      const lottogemeinschaft = Lottogemeinschaft(lottogemeinschaftAddress);
+      await lottogemeinschaft.methods.mitmachen().send({ from: userAddress });
     };
 
-  anzahlMitspielerAendernHandler = async () => {
-      const { neueAnzahlMitspieler } = this.state;
-      await this.lottogemeinschaft.methods.anzahlMitspielerAendern(neueAnzahlMitspieler).send({ from: userAddress });
+
+  preisAendernHandler = async (lottogemeinschaftAddress) => {
+      const { neuerPreis, userAddress } = this.state;
+      const lottogemeinschaft = Lottogemeinschaft(lottogemeinschaftAddress);
+      await lottogemeinschaft.methods.preisLottoscheinAendern(neuerPreis).send({ from: userAddress });
+    };
+
+  anzahlMitspielerAendernHandler = async (lottogemeinschaftAddress) => {
+      const { neueAnzahlMitspieler, userAddress } = this.state;
+      const lottogemeinschaft = Lottogemeinschaft(lottogemeinschaftAddress);
+      await lottogemeinschaft.methods.anzahlMitspielerAendern(neueAnzahlMitspieler).send({ from: userAddress });
   };
 
-  erlaubteMitspielerHinzufuegenHandler = async () => {
-      const { erlaubterMitspieler } = this.state;
-      await this.lottogemeinschaft.methods.erlaubteMitspielerAdresseHinzufuegen(erlaubterMitspieler).send({ from: userAddress });
+  erlaubteMitspielerHinzufuegenHandler = async (lottogemeinschaftAddress) => {
+      const { erlaubterMitspieler, userAddress } = this.state;
+      const lottogemeinschaft = Lottogemeinschaft(lottogemeinschaftAddress);
+      await lottogemeinschaft.methods.erlaubteMitspielerAdresseHinzufuegen(erlaubterMitspieler).send({ from: userAddress });
   };
 
-  gemeinschaftAufloesenHandler = async () => {
-      await this.lottogemeinschaft.methods.gemeinschaftAufloesen().send({ from: userAddress });
+  gemeinschaftAufloesenHandler = async (lottogemeinschaftAddress) => {
+      const lottogemeinschaft = Lottogemeinschaft(lottogemeinschaftAddress);
+      await lottogemeinschaft.methods.gemeinschaftAufloesen().send({ from: userAddress });
   };
 
   renderCards() {
@@ -135,20 +145,29 @@ class LottogemeinschaftVerwalten extends Component {
   }
 
   renderButtons() {
-      const { userAddress, gruender, nurErlaubteMitspieler } = this.state;
+      const { userAddress, gruender, nurErlaubteMitspieler, preisProMitspieler, lottogemeinschaftAddress } = this.state;
 
       if (userAddress === gruender) {
         return (
           <Grid.Row>
             <Grid.Column width={16}>
               <Form>
+                 <Form.Field>
+                  <label>Mitmachen</label>
+                  <Input
+                    placeholder='0.0001'
+                    onChange={event => this.setState({ deinAnteil: event.target.value })}
+                  />
+                  <Button onClick={() => this.mitmachHandler(lottogemeinschaftAddress)}>Mitmachen</Button>
+                </Form.Field>
+
                 <Form.Field>
                   <label>Neuer Preis</label>
                   <Input
                     placeholder='Preis in Euro'
                     onChange={event => this.setState({ neuerPreis: event.target.value })}
                   />
-                  <Button onClick={this.preisAendernHandler}>Aktualisieren</Button>
+                  <Button onClick={() => this.preisAendernHandler(lottogemeinschaftAddress)}>Aktualisieren</Button>
                 </Form.Field>
 
                 <Form.Field>
@@ -157,7 +176,7 @@ class LottogemeinschaftVerwalten extends Component {
                     placeholder='Anzahl der Mitspieler'
                     onChange={event => this.setState({ neueAnzahlMitspieler: event.target.value })}
                   />
-                  <Button onClick={this.anzahlMitspielerAendernHandler}>Aktualisieren</Button>
+                  <Button onClick={() => this.anzahlMitspielerAendernHandler(lottogemeinschaftAddress)}>Aktualisieren</Button>
                 </Form.Field>
 
                 {nurErlaubteMitspieler && (
@@ -167,12 +186,12 @@ class LottogemeinschaftVerwalten extends Component {
                       placeholder='Adresse'
                       onChange={event => this.setState({ erlaubteAdresse: event.target.value })}
                     />
-                    <Button onClick={this.erlaubteMitspielerHinzufuegenHandler}>Hinzufügen</Button>
+                    <Button onClick={() => this.erlaubteMitspielerHinzufuegenHandler(lottogemeinschaftAddress)}>Hinzufügen</Button>
                   </Form.Field>
                 )}
               </Form>
 
-              <Button onClick={this.gemeinschaftAufloesenHandler} color="red">Gemeinschaft auflösen</Button>
+              <Button onClick={() => this.gemeinschaftAufloesenHandler(lottogemeinschaftAddress)} color="red">Gemeinschaft auflösen</Button>
             </Grid.Column>
           </Grid.Row>
         );
