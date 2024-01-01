@@ -30,12 +30,12 @@ class LottogemeinschaftVerwalten extends Component {
     const { tippgemeinschaftsName } = query;
     const lottogemeinschaftAddress = await factory.methods.lottogemeinschaftsnamenmapping(query.tippgemeinschaftsName).call();
     const lottogemeinschaft = Lottogemeinschaft(lottogemeinschaftAddress);
-    const gruender = await lottogemeinschaft.methods.gruender().call();
+    const gruender = await lottogemeinschaft.methods.gruender().call().toString();
     const maxTeilnehmerAnzahl = (await lottogemeinschaft.methods.maxTeilnehmerAnzahl().call()).toString();
     const preisLottoschein  = (await lottogemeinschaft.methods.preisLottoschein().call()).toString();
 
     return {
-      tippgemeinschaftsName, gruender, maxTeilnehmerAnzahl, preisLottoschein
+      tippgemeinschaftsName, gruender, maxTeilnehmerAnzahl, preisLottoschein, lottogemeinschaft
     };
   }
 
@@ -44,7 +44,7 @@ class LottogemeinschaftVerwalten extends Component {
     const lottogemeinschaftAddress = await factory.methods.lottogemeinschaftsnamenmapping(this.props.tippgemeinschaftsName).call();
     const lottogemeinschaft = Lottogemeinschaft(lottogemeinschaftAddress);
 
-    const gruender = await lottogemeinschaft.methods.gruender().call();
+    const gruender = await lottogemeinschaft.methods.gruender().call().toString();
     const maxTeilnehmerAnzahl = (await lottogemeinschaft.methods.maxTeilnehmerAnzahl().call()).toString();
     const preisLottoschein  = (await lottogemeinschaft.methods.preisLottoschein().call()).toString();
     const preisProMitspieler = (await lottogemeinschaft.methods.preisProMitspieler().call()).toString();
@@ -55,7 +55,7 @@ class LottogemeinschaftVerwalten extends Component {
     const nurErlaubteMitspieler = await lottogemeinschaft.methods.nurErlaubteMitspieler().call();
     const auszahlung = (web3.utils.fromWei(await lottogemeinschaft.methods.auszahlung().call(), "ether")).toString();
 
-    this.setState({ gruender, maxTeilnehmerAnzahl, preisLottoschein, spielauftragsNummer, anzahlTeilnehmerAktuell, gewinnProMitspieler, kannGewinnAbgeholtWerden, nurErlaubteMitspieler, auszahlung: auszahlung.toString()});
+    this.setState({ lottogemeinschaftAddress : lottogemeinschaftAddress.toString(), lottogemeinschaft, gruender, maxTeilnehmerAnzahl, preisLottoschein, spielauftragsNummer, anzahlTeilnehmerAktuell, gewinnProMitspieler, kannGewinnAbgeholtWerden, nurErlaubteMitspieler, auszahlung: auszahlung.toString()});
 
     const accounts = await web3.eth.getAccounts();
     if (accounts.length !== 0) { // Wenn es mindestens ein Konto gibt
@@ -71,24 +71,31 @@ class LottogemeinschaftVerwalten extends Component {
     }
   }
 
+  mitmachHandler = async () => {
+      const { deinAnteil } = this.state;
+      // Verwenden Sie web3 und Ihren Contract, um den Preis zu aktualisieren.
+      await lottogemeinschaft.methods.mitmachen().send({ from: userAddress });
+    };
+
+
   preisAendernHandler = async () => {
       const { neuerPreis } = this.state;
       // Verwenden Sie web3 und Ihren Contract, um den Preis zu aktualisieren.
-      await this.lottogemeinschaft.methods.preisLottoscheinAendern(neuerPreis).send({ from: userAddress });
+      await lottogemeinschaft.methods.preisLottoscheinAendern(neuerPreis).send({ from: userAddress });
     };
 
   anzahlMitspielerAendernHandler = async () => {
       const { neueAnzahlMitspieler } = this.state;
-      await this.lottogemeinschaft.methods.anzahlMitspielerAendern(neueAnzahlMitspieler).send({ from: userAddress });
+      await lottogemeinschaft.methods.anzahlMitspielerAendern(neueAnzahlMitspieler).send({ from: userAddress });
   };
 
   erlaubteMitspielerHinzufuegenHandler = async () => {
       const { erlaubterMitspieler } = this.state;
-      await this.lottogemeinschaft.methods.erlaubteMitspielerAdresseHinzufuegen(erlaubterMitspieler).send({ from: userAddress });
+      await lottogemeinschaft.methods.erlaubteMitspielerAdresseHinzufuegen(erlaubterMitspieler).send({ from: userAddress });
   };
 
   gemeinschaftAufloesenHandler = async () => {
-      await this.lottogemeinschaft.methods.gemeinschaftAufloesen().send({ from: userAddress });
+      await lottogemeinschaft.methods.gemeinschaftAufloesen().send({ from: userAddress });
   };
 
   renderCards() {
@@ -135,13 +142,22 @@ class LottogemeinschaftVerwalten extends Component {
   }
 
   renderButtons() {
-      const { userAddress, gruender, nurErlaubteMitspieler } = this.state;
+      const { userAddress, gruender, nurErlaubteMitspieler, preisProMitspieler } = this.state;
 
       if (userAddress === gruender) {
         return (
           <Grid.Row>
             <Grid.Column width={16}>
               <Form>
+                 <Form.Field>
+                  <label>Mitmachen</label>
+                  <Input
+                    placeholder='2.50€'
+                    onChange={event => this.setState({ deinAnteil: event.target.value })}
+                  />
+                  <Button onClick={this.mitmachHandler}>Mitmachen</Button>
+                </Form.Field>
+
                 <Form.Field>
                   <label>Neuer Preis</label>
                   <Input
