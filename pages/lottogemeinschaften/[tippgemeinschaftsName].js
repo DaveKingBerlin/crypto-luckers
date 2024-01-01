@@ -55,7 +55,7 @@ class LottogemeinschaftVerwalten extends Component {
     const nurErlaubteMitspieler = await lottogemeinschaft.methods.nurErlaubteMitspieler().call();
     const auszahlung = (web3.utils.fromWei(await lottogemeinschaft.methods.auszahlung().call(), "ether")).toString();
 
-    this.setState({ lottogemeinschaftAddress : lottogemeinschaftAddress.toString(), lottogemeinschaft, gruender, maxTeilnehmerAnzahl, preisLottoschein, spielauftragsNummer, anzahlTeilnehmerAktuell, gewinnProMitspieler, kannGewinnAbgeholtWerden, nurErlaubteMitspieler, auszahlung: auszahlung.toString()});
+    this.setState({ lottogemeinschaftAddress : lottogemeinschaftAddress.toString(), lottogemeinschaft, gruender, maxTeilnehmerAnzahl, preisLottoschein, preisProMitspieler, spielauftragsNummer, anzahlTeilnehmerAktuell, gewinnProMitspieler, kannGewinnAbgeholtWerden, nurErlaubteMitspieler, auszahlung: auszahlung.toString()});
 
     const accounts = await web3.eth.getAccounts();
     if (accounts.length !== 0) { // Wenn es mindestens ein Konto gibt
@@ -72,9 +72,9 @@ class LottogemeinschaftVerwalten extends Component {
   }
 
   mitmachHandler = async (lottogemeinschaftAddress) => {
-      const { deinAnteil, userAddress  } = this.state;
+      const { preisProMitspieler, userAddress  } = this.state;
       const lottogemeinschaft = Lottogemeinschaft(lottogemeinschaftAddress);
-      await lottogemeinschaft.methods.mitmachen().send({ from: userAddress });
+      await lottogemeinschaft.methods.mitmachen().send({ from: userAddress, value: preisProMitspieler });
     };
 
 
@@ -152,13 +152,13 @@ class LottogemeinschaftVerwalten extends Component {
           <Grid.Row>
             <Grid.Column width={16}>
               <Form>
-                 <Form.Field>
-                  <label>Mitmachen</label>
-                  <Input
-                    placeholder='0.0001'
+                <Form.Field>
+                <label>Mitmachen</label>
+                <Input
+                    placeholder={`Preis pro Mitspieler: ${this.state.preisProMitspieler} ETH`}
                     onChange={event => this.setState({ deinAnteil: event.target.value })}
-                  />
-                  <Button onClick={() => this.mitmachHandler(lottogemeinschaftAddress)}>Mitmachen</Button>
+                />
+                <Button onClick={() => this.mitmachHandler(this.state.lottogemeinschaftAddress, this.state.deinAnteil)}>Mitmachen</Button>
                 </Form.Field>
 
                 <Form.Field>
