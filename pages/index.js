@@ -4,6 +4,7 @@ import factory from "../ethereum/fabrik";
 import Layout from "../components/Layout";
 import Lottogemeinschaft from '../ethereum/lottogemeinschaft';
 import Link from 'next/link';
+import Router from 'next/router';
 
 class LottogemeinschaftIndex extends Component {
   state = {
@@ -24,50 +25,86 @@ class LottogemeinschaftIndex extends Component {
   renderOffeneLottogemeinschaften() {
       const items = this.state.details.map(({ preisProPerson, mitgliederzahl, maximaleMitglieder }, index) => {
         const metaContent = mitgliederzahl < maximaleMitglieder
-            ? <span style={{ color: 'green' }}>kannst noch mitmachen</span>
-            : <span style={{ color: 'red' }}>chance verpasst</span>;
+            ? <span style={{ color: 'green' }}>offen</span>
+            : <span style={{ color: 'red' }}>Limit erreicht</span>;
+
+        const tippgemeinschaftsName = this.props.lottogemeinschaftsnamen[index];
 
         return {
-            header: this.props.lottogemeinschaftsnamen[index],
-            description: `${preisProPerson} €  ---  ${mitgliederzahl} / ${maximaleMitglieder} Mitläufer`,
-            meta: metaContent,
+            header: tippgemeinschaftsName,
+            description: (
+              <div>
+                <span>{`${preisProPerson} €  ---  ${mitgliederzahl} / ${maximaleMitglieder} Mitläufer`}</span>
+                {metaContent}
+              </div>
+            ),
+            meta: mitgliederzahl < maximaleMitglieder && (
+              <a onClick={() => Router.push(`/lottogemeinschaften/${tippgemeinschaftsName}`)}>
+                mitmachen
+              </a>
+            ),
             fluid: false,
         };
       });
       return <Card.Group items={items} />;
-  }
+    }
+
+
 
   renderGeschlosseneLottogemeinschaften() {
       const items = this.state.details.map(({ preisProPerson, mitgliederzahl, maximaleMitglieder }, index) => {
-        const metaContent = mitgliederzahl > maximaleMitglieder
-            ? <span style={{ color: 'green' }}>kannst noch mitmachen</span>
-            : <span style={{ color: 'red' }}>chance verpasst</span>;
+        const metaContent = mitgliederzahl === maximaleMitglieder
+            ? <span style={{ color: 'green' }}>offen</span>
+            : <span style={{ color: 'red' }}>Limit erreicht</span>;  // Diese Zeile könnte optional sein, je nachdem, ob Sie etwas anzeigen möchten, wenn die Bedingung nicht erfüllt ist.
+
+        const tippgemeinschaftsName = this.props.lottogemeinschaftsnamen[index];
 
         return {
-            header: this.props.lottogemeinschaftsnamen[index]+"Voll!",
-            description: `${maximaleMitglieder} / ${maximaleMitglieder} Mitläufer`,
-            meta: metaContent,
+            header: tippgemeinschaftsName,
+            description: (
+              <div>
+                <span>{`${preisProPerson} €  ---  ${mitgliederzahl} / ${maximaleMitglieder} Mitläufer`}</span>
+                {metaContent}
+              </div>
+            ),
+            meta: mitgliederzahl === maximaleMitglieder && (
+              <a onClick={() => Router.push(`/lottogemeinschaften/${tippgemeinschaftsName}`)}>
+                anschauen
+              </a>
+            ),
             fluid: false,
         };
       });
       return <Card.Group items={items} />;
-  }
+    }
 
-  renderEigeneLottogemeinschaften() {
+
+  renderVerwalteLottogemeinschaften() {
       const items = this.state.details.map(({ preisProPerson, mitgliederzahl, maximaleMitglieder }, index) => {
         const metaContent = mitgliederzahl < maximaleMitglieder
-            ? <span style={{ color: 'green' }}>kannst noch mitmachen</span>
-            : <span style={{ color: 'red' }}>chance verpasst</span>;
+            ? <span style={{ color: 'blue' }}>verwalten</span>
+            : <span style={{ color: 'green' }}>weitere Aktionen</span>;
+
+        const tippgemeinschaftsName = this.props.lottogemeinschaftsnamen[index];
 
         return {
-            header: this.props.lottogemeinschaftsnamen[index],
-            description: `${mitgliederzahl} / ${maximaleMitglieder} Mitläufer`,
-            meta: <a>bearbeiten</a>,
+            header: tippgemeinschaftsName,
+            description: (
+              <div>
+                <span>{`${preisProPerson} €  ---  ${mitgliederzahl} / ${maximaleMitglieder} Mitläufer`}</span>
+                {metaContent} {/* Fügen Sie metaContent direkt als JSX-Element ein */}
+              </div>
+            ),
+            meta: (
+              <a onClick={() => Router.push(`/lottogemeinschaften/${tippgemeinschaftsName}`)}>
+                bearbeiten
+              </a>),
             fluid: false,
         };
       });
       return <Card.Group items={items} />;
   }
+
 
 
   async componentDidMount() {
@@ -192,7 +229,7 @@ class LottogemeinschaftIndex extends Component {
               <Grid.Column textAlign="center">
                 <a>
                   <Button
-                    content={this.renderEigeneLottogemeinschaften()}
+                    content={this.renderVerwalteLottogemeinschaften()}
                     primary
                   />
                 </a>
