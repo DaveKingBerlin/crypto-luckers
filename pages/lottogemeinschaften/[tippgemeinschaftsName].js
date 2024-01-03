@@ -33,9 +33,10 @@ class LottogemeinschaftVerwalten extends Component {
     const gruender = await lottogemeinschaft.methods.gruender().call();
     const maxTeilnehmerAnzahl = (await lottogemeinschaft.methods.maxTeilnehmerAnzahl().call()).toString();
     const preisLottoschein  = (await lottogemeinschaft.methods.preisLottoschein().call()).toString();
+    const anzahlTeilnehmerAktuell = (await lottogemeinschaft.methods.anzahlTeilnehmerAktuell().call()).toString();
 
     return {
-      tippgemeinschaftsName, gruender, maxTeilnehmerAnzahl, preisLottoschein, lottogemeinschaftAddress
+      tippgemeinschaftsName, gruender, maxTeilnehmerAnzahl, preisLottoschein, lottogemeinschaftAddress, anzahlTeilnehmerAktuell
     };
   }
 
@@ -106,6 +107,7 @@ class LottogemeinschaftVerwalten extends Component {
       tippgemeinschaftsName,
       gruender,
       maxTeilnehmerAnzahl,
+      anzahlTeilnehmerAktuell,
       preisLottoschein,
       auszahlung,
       // ... andere Zustände
@@ -124,17 +126,16 @@ class LottogemeinschaftVerwalten extends Component {
         description: "",
       },
       {
-        header: maxTeilnehmerAnzahl || "",
-        meta: "maxTeilnehmerAnzahl",
-        description: "",
+      "header": ["Aktuelle Teilnehmerzahl: " + anzahlTeilnehmerAktuell + "----" || "", "Maximale Teilnehmeranzahl: " + maxTeilnehmerAnzahl + "----" || "", "Preis für Lottoschein: " + preisLottoschein || ""],
+      "meta": "Lottogemeinschaftdetails",
+          "description": {
+            "maxteilnehmeranzahl": "Gibt die maximale Anzahl von Teilnehmern an, die für das Ereignis zugelassen sind.",
+            "preislottoschein": "Gibt den Preis für einen einzelnen Lottoschein an.",
+            "anzahlteilnehmeraktuell": "Zeigt die Anzahl der Personen an, die sich bereits für das Ereignis angemeldet haben."
+          }
       },
       {
-        header: preisLottoschein || "",
-        meta: "preisLottoschein",
-        description: "",
-      },
-      {
-        header: auszahlung ? web3.utils.fromWei(auszahlung, "ether") : "Lädt...",
+        header: auszahlung ? web3.utils.fromWei(auszahlung, "ether") : "Keine",
         meta: "auszahlung",
         description: ""
       },
