@@ -146,7 +146,7 @@ class LottogemeinschaftVerwalten extends Component {
   }
 
   renderButtons() {
-      const { userAddress, gruender, nurErlaubteMitspieler, preisProMitspieler, lottogemeinschaftAddress } = this.state;
+      const { userAddress, gruender, nurErlaubteMitspieler, preisProMitspieler, lottogemeinschaftAddress, anzahlTeilnehmerAktuell, maxTeilnehmerAnzahl } = this.state;
 
       if (userAddress === gruender) {
         return (
@@ -196,25 +196,52 @@ class LottogemeinschaftVerwalten extends Component {
             </Grid.Column>
           </Grid.Row>
         );
+      } else if (anzahlTeilnehmerAktuell < maxTeilnehmerAnzahl){
+            return (<Form>
+                <Form.Field>
+                <label>Mitmachen</label>
+                <Input
+                    placeholder={`Preis pro Mitspieler: ${this.state.preisProMitspieler} ETH`}
+                    onChange={event => this.setState({ deinAnteil: event.target.value })}
+                />
+                <Button onClick={() => this.mitmachHandler(this.state.lottogemeinschaftAddress, this.state.deinAnteil)}>Mitmachen</Button>
+                </Form.Field>
+            </Form>)
+      } else {
+        return null; // Keine Buttons rendern, wenn anzahlTeilnehmerAktuell == maxTeilnehmerAnzahl
       }
 
-      return null; // Nichts rendern, wenn der Benutzer nicht der Gründer ist
     }
 
 
   render() {
-    return (
-      <Layout>
-        <h3>Lottogemeinschaftsverwalten</h3>
-        <Grid>
-          <Grid.Row>
-            <Grid.Column width={16}>{this.renderCards()}</Grid.Column>
-          </Grid.Row>
-          {this.renderButtons()}
-        </Grid>
-      </Layout>
-    );
-  }
+    const { userAddress, gruender } = this.state;
+    if (userAddress === gruender) {
+        return (
+          <Layout>
+            <h3>Lottogemeinschaftsverwaltung</h3>
+            <Grid>
+              <Grid.Row>
+                <Grid.Column width={16}>{this.renderCards()}</Grid.Column>
+              </Grid.Row>
+              {this.renderButtons()}
+            </Grid>
+          </Layout>
+        );
+      } else {
+        return (
+          <Layout>
+            <h3>Lottogemeinschaftsansicht</h3>
+            <Grid>
+              <Grid.Row>
+                <Grid.Column width={16}>{this.renderCards()}</Grid.Column>
+              </Grid.Row>
+              {this.renderButtons()}
+            </Grid>
+          </Layout>
+        );
+      }
+    }
 }
 
 export default LottogemeinschaftVerwalten;
