@@ -4,9 +4,11 @@ import Layout from "../../components/Layout";
 import Lottogemeinschaft from "../../ethereum/lottogemeinschaft";
 import factory from "../../ethereum/fabrik";
 import web3 from "../../ethereum/web3";
+import Web3 from 'web3';
 import { Link } from "../../routes";
 
 class LottogemeinschaftVerwalten extends Component {
+
   state = {
     userAddress: "",
     istMitspieler: false,
@@ -23,10 +25,11 @@ class LottogemeinschaftVerwalten extends Component {
     anzahlTeilnehmerAktuell: 0,
     gewinnProMitspieler: 0,
     auszahlung: 0,
-
+    euroInWei: process.env.REACT_APP_EURO || '500000000000000',
   };
 
   static async getInitialProps({ query }) {
+    const euroInWei = process.env.REACT_APP_EURO || '500000000000000';
     const { tippgemeinschaftsName } = query;
     const lottogemeinschaftAddress = await factory.methods.lottogemeinschaftsnamenmapping(query.tippgemeinschaftsName).call();
     const lottogemeinschaft = Lottogemeinschaft(lottogemeinschaftAddress);
@@ -34,13 +37,15 @@ class LottogemeinschaftVerwalten extends Component {
     const maxTeilnehmerAnzahl = (await lottogemeinschaft.methods.maxTeilnehmerAnzahl().call()).toString();
     const preisLottoschein  = (await lottogemeinschaft.methods.preisLottoschein().call()).toString();
     const anzahlTeilnehmerAktuell = (await lottogemeinschaft.methods.anzahlTeilnehmerAktuell().call()).toString();
+    const preisProMitspieler = (await lottogemeinschaft.methods.preisProMitspieler().call()).toString();
 
     return {
-      tippgemeinschaftsName, gruender, maxTeilnehmerAnzahl, preisLottoschein, lottogemeinschaftAddress, anzahlTeilnehmerAktuell
+      tippgemeinschaftsName, gruender, maxTeilnehmerAnzahl, preisLottoschein, lottogemeinschaftAddress, anzahlTeilnehmerAktuell, preisProMitspieler
     };
   }
 
   async componentDidMount() {
+    const euroInWei = process.env.REACT_APP_EURO || '500000000000000';
 
     const lottogemeinschaftAddress = await factory.methods.lottogemeinschaftsnamenmapping(this.props.tippgemeinschaftsName).call();
     const lottogemeinschaft = Lottogemeinschaft(lottogemeinschaftAddress);
@@ -73,9 +78,28 @@ class LottogemeinschaftVerwalten extends Component {
   }
 
   mitmachHandler = async (lottogemeinschaftAddress) => {
-      const { preisProMitspieler, userAddress  } = this.state;
+      const { preisProMitspieler, userAddress, euroInWei } = this.state;
       const lottogemeinschaft = Lottogemeinschaft(lottogemeinschaftAddress);
-      await lottogemeinschaft.methods.mitmachen().send({ from: userAddress, value: preisProMitspieler });
+
+      console.log('preisProMitspieler:', this.state.preisProMitspieler);
+      console.log('euroInWei:', this.state.euroInWei);
+
+      // Berechne den Preis in Wei
+      const preisInWei = Number(preisProMitspieler) * Number(euroInWei);
+
+      console.log('Berechneter preisInWei:', preisInWei);
+
+      // Stelle sicher, dass preisInWei eine gültige Nummer ist
+      const isValidNumber = !isNaN(preisInWei) && isFinite(preisInWei);
+
+      console.log('isValidNumber:', isValidNumber);
+
+      const valueToSend = isValidNumber ? preisInWei.toString() : '0';
+
+      console.log(valueToSend);
+
+      // Senden der Transaktion mit Metamask
+      await lottogemeinschaft.methods.mitmachen().send({ from: userAddress, value: valueToSend });
     };
 
 
@@ -109,6 +133,7 @@ class LottogemeinschaftVerwalten extends Component {
       maxTeilnehmerAnzahl,
       anzahlTeilnehmerAktuell,
       preisLottoschein,
+      preisProMitspieler,
       auszahlung,
       // ... andere Zustände
     } = this.props;
@@ -126,7 +151,7 @@ class LottogemeinschaftVerwalten extends Component {
         description: "",
       },
       {
-      "header": ["Aktuelle Teilnehmerzahl: " + anzahlTeilnehmerAktuell + "----" || "", "Maximale Teilnehmeranzahl: " + maxTeilnehmerAnzahl + "----" || "", "Preis für Lottoschein: " + preisLottoschein || ""],
+      "header": ["Aktuelle Teilnehmerzahl: " + anzahlTeilnehmerAktuell + " | " || "", "Max. Teilnehmeranzahl: " + maxTeilnehmerAnzahl + " | " || "", "Preis pro Mitspieler: " + preisProMitspieler + " | " || "", "Lottoscheinpreispreis: " + preisLottoschein],
       "meta": "Lottogemeinschaftdetails",
           "description": {
             "maxteilnehmeranzahl": "Gibt die maximale Anzahl von Teilnehmern an, die für das Ereignis zugelassen sind.",
@@ -154,14 +179,12 @@ class LottogemeinschaftVerwalten extends Component {
             <Grid.Column width={16}>
               <Form>
                 <Form.Field>
-                <label>Mitmachen</label>
-                <Input
-                    placeholder={`Preis pro Mitspieler: ${this.state.preisProMitspieler} ETH`}
-                    onChange={event => this.setState({ deinAnteil: event.target.value })}
-                />
-                <Button onClick={() => this.mitmachHandler(this.state.lottogemeinschaftAddress, this.state.deinAnteil)}>Mitmachen</Button>
+                    <label>Mitmachen</label>
+                    <div>
+                        Preis pro Mitspieler: {this.state.preisProMitspieler} Euro
+                    </div>
+                    <Button onClick={() => this.mitmachHandler(this.state.lottogemeinschaftAddress, this.state.deinAnteil)}>Mitmachen</Button>
                 </Form.Field>
-
                 <Form.Field>
                   <label>Neuer Preis</label>
                   <Input
@@ -197,16 +220,12 @@ class LottogemeinschaftVerwalten extends Component {
           </Grid.Row>
         );
       } else if (anzahlTeilnehmerAktuell < maxTeilnehmerAnzahl){
-            return (<Form>
-                <Form.Field>
-                <label>Mitmachen</label>
-                <Input
-                    placeholder={`Preis pro Mitspieler: ${this.state.preisProMitspieler} ETH`}
-                    onChange={event => this.setState({ deinAnteil: event.target.value })}
-                />
-                <Button onClick={() => this.mitmachHandler(this.state.lottogemeinschaftAddress, this.state.deinAnteil)}>Mitmachen</Button>
-                </Form.Field>
-            </Form>)
+            return (<Form.Field>
+                <div>
+                    Preis pro Mitspieler: {this.state.preisProMitspieler} Euro
+                </div>
+                <Button onClick={() => this.mitmachHandler(this.state.lottogemeinschaftAddress, this.state.deinAnteil)}>Mitmachen für {this.state.preisProMitspieler} Euro</Button>
+            </Form.Field>)
       } else {
         return null; // Keine Buttons rendern, wenn anzahlTeilnehmerAktuell == maxTeilnehmerAnzahl
       }
