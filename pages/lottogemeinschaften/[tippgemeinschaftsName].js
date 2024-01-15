@@ -25,6 +25,7 @@ class LottogemeinschaftVerwalten extends Component {
     anzahlTeilnehmerAktuell: 0,
     gewinnProMitspieler: 0,
     auszahlung: 0,
+    gewinnKannAbgeholtWerden: false,
     euroInWei: process.env.REACT_APP_EURO || '500000000000000',
   };
 
@@ -57,11 +58,11 @@ class LottogemeinschaftVerwalten extends Component {
     const spielauftragsNummer = await lottogemeinschaft.methods.spielauftragsNummer().call();
     const anzahlTeilnehmerAktuell = (await lottogemeinschaft.methods.anzahlTeilnehmerAktuell().call()).toString();
     const gewinnProMitspieler = (await lottogemeinschaft.methods.gewinnProMitspieler().call()).toString();
-    const kannGewinnAbgeholtWerden = await lottogemeinschaft.methods.kannGewinnAbgeholtWerden().call();
+    const gewinnKannAbgeholtWerden = await lottogemeinschaft.methods.gewinnKannAbgeholtWerden().call();
     const nurErlaubteMitspieler = await lottogemeinschaft.methods.nurErlaubteMitspieler().call();
     const auszahlung = (web3.utils.fromWei(await lottogemeinschaft.methods.auszahlung().call(), "ether")).toString();
 
-    this.setState({ lottogemeinschaftAddress : lottogemeinschaftAddress.toString(), lottogemeinschaft, gruender, maxTeilnehmerAnzahl, preisLottoschein, preisProMitspieler, spielauftragsNummer, anzahlTeilnehmerAktuell, gewinnProMitspieler, kannGewinnAbgeholtWerden, nurErlaubteMitspieler, auszahlung: auszahlung.toString()});
+    this.setState({ lottogemeinschaftAddress : lottogemeinschaftAddress.toString(), lottogemeinschaft, gruender, maxTeilnehmerAnzahl, preisLottoschein, preisProMitspieler, spielauftragsNummer, anzahlTeilnehmerAktuell, gewinnProMitspieler, gewinnKannAbgeholtWerden, nurErlaubteMitspieler, auszahlung: auszahlung.toString()});
 
     const accounts = await web3.eth.getAccounts();
     if (accounts.length !== 0) { // Wenn es mindestens ein Konto gibt

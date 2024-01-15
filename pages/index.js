@@ -72,7 +72,7 @@ class LottogemeinschaftIndex extends Component {
                 <div>
                   <span>{`${preisProPerson} €  ---  ${mitgliederzahl} / ${maximaleMitglieder} Mitspieler`}</span>
                   <div>
-                    <span style={{ color: 'green' }}>Limit erreicht</span>
+                    <span style={{ color: 'red' }}>Limit erreicht</span>
                     <p>`${preisProPerson} €  ---  ${mitgliederzahl} / ${maximaleMitglieder} Mitspieler`</p>
                     <a onClick={() => Router.push(`/lottogemeinschaften/${tippgemeinschaftsName}`)}>
                       anschauen

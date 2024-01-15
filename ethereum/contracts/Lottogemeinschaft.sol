@@ -48,12 +48,14 @@ contract Lottogemeinschaft {
     uint48 public auszahlung;
     mapping(address => bool) public mitspieler;
     mapping(address => bool) public gewinnAusgezahlt;
+    mapping(address => bool) public einsatzZurueckGezahlt;
     uint16 public anzahlTeilnehmerAktuell;
     uint48 public gewinnProMitspieler = 0;
-    bool public kannGewinnAbgeholtWerden=false;
+    bool public gewinnKannAbgeholtWerden=false;
     bool public nurErlaubteMitspieler=false;
     mapping(address => bool) public erlaubterMitspieler;
     bool private locked;
+    bool public aufgeloest;
 
     constructor (string memory name, address ersteller, uint16 anzahl, uint32 preis, string memory scheinNummer, bool mitspielerBestimmen) {
         require(anzahl < 65535, "Maximal 65534 Mitspieler erlaubt");
@@ -86,7 +88,6 @@ contract Lottogemeinschaft {
     }
 
     function mitmachen() public payable {
-        preisProMitspieler= preisLottoschein / maxTeilnehmerAnzahl;
     // Checks
         require(preisProMitspieler>0, "Kein Preis pro Mitspieler");
         require(msg.value >= preisProMitspieler, "Zu geringer Einzahlungsbetrag");
@@ -120,27 +121,22 @@ contract Lottogemeinschaft {
         // Hier könnten Sie zusätzliche Logik hinzufügen, falls notwendig
         // Zum Beispiel: Speichern des Gewinnbetrags im Contract
         gewinnProMitspieler = gewinn / anzahlTeilnehmerAktuell;
-        kannGewinnAbgeholtWerden = true;
+        gewinnKannAbgeholtWerden = true;
 
     }
 
 
-    // Funktion zur Auszahlung der Gewinne
-    function gewinnAuszahlen() public restictedToMitspieler nonReentrant {
-        // Checks
-        require(gewinnProMitspieler > 0, "Kein Gewinn eingezahlt");
-        require(mitspieler[msg.sender], "Du bist kein Mitspieler");
-        require(!gewinnAusgezahlt[msg.sender], "Dein Gewinn wurde bereits ausgezahlt");
+    // Funktion, um den Gewinn abzuholen
+    function gewinnAbholen() public restictedToMitspieler nonReentrant {
+        require(gewinnKannAbgeholtWerden, "Gewinn kann noch nicht abgeholt werden.");
+        require(gewinnProMitspieler > 0, "Kein Gewinn zur Auszahlung verfuegbar.");
+        require(!gewinnAusgezahlt[msg.sender], "Gewinn wurde bereits abgeholt.");
 
-        // Effects
         gewinnAusgezahlt[msg.sender] = true;
 
-        // Interactions
         uint auszahlungsbetrag = gewinnProMitspieler;
-        (bool sent, ) = msg.sender.call{value: auszahlungsbetrag}("");
-        require(sent, "Auszahlung des Gewinns fehlgeschlagen");
+        payable(msg.sender).transfer(auszahlungsbetrag);
     }
-
 
 
     function preisLottoscheinAendern(uint32 neuerPreis) public restictedToGruender{
@@ -158,24 +154,23 @@ contract Lottogemeinschaft {
         erlaubterMitspieler[_erlaubterMitspieler] = true;
     }
 
-    // Funktion zum Auflösen der Lottogemeinschaft und zur Rückzahlung der Einzahlungen
+    // Funktion zum Auflösen der Lottogemeinschaft und Auszahlung der Einzahlungen aktivieren
     function gemeinschaftAufloesen() public restictedToGruender {
-        require(kannGewinnAbgeholtWerden == false, "Gewinn muss noch ausgezahlt werden");
+        require(gewinnKannAbgeholtWerden == false, "Gewinn muss noch ausgezahlt werden");
+        require(aufgeloest == false, "Gemeinschaft bereits aufgeloest");
+        aufgeloest = true;
+    }
 
-        // Rückzahlung der Einzahlungen an alle registrierten Mitspieler
+    // Funktion, um den Einsatz zurückzuerhalten
+    function einsatzZurueckholen() public restictedToMitspieler nonReentrant {
+        require(aufgeloest, "Gemeinschaft muss aufgeloest sein.");
+        require(!einsatzZurueckGezahlt[msg.sender], "Einsatz wurde bereits zurueckgezahlt.");
+
+        einsatzZurueckGezahlt[msg.sender] = true;
+
         uint rueckzahlungsbetrag = preisProMitspieler;
-        for (uint i = 0; i < lottogemeinschaften.length; i++) {
-            address payable mitspielerAdresse = lottogemeinschaften[i];
-
-            // Sicherstellen, dass nur diejenigen bezahlt werden, die noch keinen Gewinn erhalten haben
-            if (!gewinnAusgezahlt[mitspielerAdresse]) {
-                (bool sent, ) = mitspielerAdresse.call{value: rueckzahlungsbetrag}("");
-                require(sent, "Rueckzahlung an Mitspieler fehlgeschlagen");
-            }
-        }
-
-        // Selbstzerstörung des Vertrags, um alle verbleibenden Mittel an den Gründer zurückzusenden und den Vertrag zu deaktivieren
-        selfdestruct(payable(gruender));
+        (bool sent, ) = msg.sender.call{value: rueckzahlungsbetrag}("");
+        require(sent, "Rueckzahlung des Einsatzes fehlgeschlagen.");
     }
 
 
