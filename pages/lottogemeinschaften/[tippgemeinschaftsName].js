@@ -185,9 +185,12 @@ class LottogemeinschaftVerwalten extends Component {
 
   renderButtons() {
       const { userAddress, gruender, nurErlaubteMitspieler, preisProMitspieler, lottogemeinschaftAddress, anzahlTeilnehmerAktuell, maxTeilnehmerAnzahl } = this.state;
+      const isGruender = userAddress === gruender;
+      const nochKeineMitspieler = Number(anzahlTeilnehmerAktuell) === 0;
+      const bereitsMitspieler = 0 < Number(anzahlTeilnehmerAktuell) && Number(anzahlTeilnehmerAktuell) < Number(maxTeilnehmerAnzahl);
+      const istVoll = Number(anzahlTeilnehmerAktuell) === Number(maxTeilnehmerAnzahl);
 
-      if (userAddress === gruender) {
-        if (anzahlTeilnehmerAktuell === 0){
+      if (isGruender && nochKeineMitspieler) {
             return (
               <Grid.Row>
                 <Grid.Column width={16}>
@@ -233,12 +236,18 @@ class LottogemeinschaftVerwalten extends Component {
                 </Grid.Column>
               </Grid.Row>
             );
-            } else if (anzahlTeilnehmerAktuell < maxTeilnehmerAnzahl)
-                {
-                return (
+      } else if (isGruender && bereitsMitspieler) {
+            return (
               <Grid.Row>
                 <Grid.Column width={16}>
                   <Form>
+                    <Form.Field>
+                        <label>Mitmachen</label>
+                        <div>
+                            Preis pro Mitspieler: {this.state.preisProMitspieler} Euro
+                        </div>
+                        <Button onClick={() => this.mitmachHandler(this.state.lottogemeinschaftAddress, this.state.deinAnteil)}>Mitmachen</Button>
+                    </Form.Field>
                     {nurErlaubteMitspieler && (
                       <Form.Field>
                         <label>Erlaubte Adresse hinzufügen</label>
@@ -255,9 +264,8 @@ class LottogemeinschaftVerwalten extends Component {
                 </Grid.Column>
               </Grid.Row>
             );
-                }
-            else {
-                return (
+      } else if (isGruender && istVoll){
+       return (
               <Grid.Row>
                 <Grid.Column width={16}>
                   <Form>
@@ -274,15 +282,14 @@ class LottogemeinschaftVerwalten extends Component {
                 </Grid.Column>
               </Grid.Row>
             );
-            }
-      } else if (anzahlTeilnehmerAktuell < maxTeilnehmerAnzahl){
+       } else if (!isGruender && !istVoll){
             return (<Form.Field>
                 <div>
                     Preis pro Mitspieler: {this.state.preisProMitspieler} Euro
                 </div>
                 <Button onClick={() => this.mitmachHandler(this.state.lottogemeinschaftAddress, this.state.deinAnteil)}>Mitmachen für {this.state.preisProMitspieler} Euro</Button>
             </Form.Field>)
-      } else {
+      } else if (!isGruender && istVoll){
             const gewinnInEuro = web3.utils.fromWei(this.state.gewinnProMitspieler, "ether") * this.state.euroInWei / 100000000000;
             return (<Form.Field>
                 <div>
