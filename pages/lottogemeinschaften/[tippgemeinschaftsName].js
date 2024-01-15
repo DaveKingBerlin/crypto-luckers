@@ -82,22 +82,13 @@ class LottogemeinschaftVerwalten extends Component {
       const { preisProMitspieler, userAddress, euroInWei } = this.state;
       const lottogemeinschaft = Lottogemeinschaft(lottogemeinschaftAddress);
 
-      console.log('preisProMitspieler:', this.state.preisProMitspieler);
-      console.log('euroInWei:', this.state.euroInWei);
-
       // Berechne den Preis in Wei
       const preisInWei = Number(preisProMitspieler) * Number(euroInWei);
-
-      console.log('Berechneter preisInWei:', preisInWei);
 
       // Stelle sicher, dass preisInWei eine gültige Nummer ist
       const isValidNumber = !isNaN(preisInWei) && isFinite(preisInWei);
 
-      console.log('isValidNumber:', isValidNumber);
-
       const valueToSend = isValidNumber ? preisInWei.toString() : '0';
-
-      console.log(valueToSend);
 
       // Senden der Transaktion mit Metamask
       await lottogemeinschaft.methods.mitmachen().send({ from: userAddress, value: valueToSend });
@@ -123,9 +114,29 @@ class LottogemeinschaftVerwalten extends Component {
   };
 
   gemeinschaftAufloesenHandler = async (lottogemeinschaftAddress) => {
+      const { userAddress } = this.state;
       const lottogemeinschaft = Lottogemeinschaft(lottogemeinschaftAddress);
       await lottogemeinschaft.methods.gemeinschaftAufloesen().send({ from: userAddress });
   };
+
+  einsatzZurueckholenHandler = async (lottogemeinschaftAddress) => {
+      const { userAddress } = this.state;
+      const lottogemeinschaft = Lottogemeinschaft(lottogemeinschaftAddress);
+      await lottogemeinschaft.methods.einsatzZurueckholen().send({ from: userAddress });
+  };
+
+  gewinnEinzahlenHandler = async (lottogemeinschaftAddress, gewinn) => {
+      const { userAddress } = this.state;
+      const lottogemeinschaft = Lottogemeinschaft(lottogemeinschaftAddress);
+      await lottogemeinschaft.methods.gewinnEinzahlen(gewinn).send({ from: userAddress, value: gewinn });
+  };
+
+  gewinnAbholenHandler = async (lottogemeinschaftAddress) => {
+      const { userAddress } = this.state;
+      const lottogemeinschaft = Lottogemeinschaft(lottogemeinschaftAddress);
+      await lottogemeinschaft.methods.gewinnAbholen().send({ from: userAddress });
+  };
+
 
   renderCards() {
     const {
@@ -175,51 +186,94 @@ class LottogemeinschaftVerwalten extends Component {
       const { userAddress, gruender, nurErlaubteMitspieler, preisProMitspieler, lottogemeinschaftAddress, anzahlTeilnehmerAktuell, maxTeilnehmerAnzahl } = this.state;
 
       if (userAddress === gruender) {
-        return (
-          <Grid.Row>
-            <Grid.Column width={16}>
-              <Form>
-                <Form.Field>
-                    <label>Mitmachen</label>
-                    <div>
-                        Preis pro Mitspieler: {this.state.preisProMitspieler} Euro
-                    </div>
-                    <Button onClick={() => this.mitmachHandler(this.state.lottogemeinschaftAddress, this.state.deinAnteil)}>Mitmachen</Button>
-                </Form.Field>
-                <Form.Field>
-                  <label>Neuer Preis</label>
-                  <Input
-                    placeholder='Preis in Euro'
-                    onChange={event => this.setState({ neuerPreis: event.target.value })}
-                  />
-                  <Button onClick={() => this.preisAendernHandler(lottogemeinschaftAddress)}>Aktualisieren</Button>
-                </Form.Field>
+        if (anzahlTeilnehmerAktuell === 0){
+            return (
+              <Grid.Row>
+                <Grid.Column width={16}>
+                  <Form>
+                    <Form.Field>
+                        <label>Mitmachen</label>
+                        <div>
+                            Preis pro Mitspieler: {this.state.preisProMitspieler} Euro
+                        </div>
+                        <Button onClick={() => this.mitmachHandler(this.state.lottogemeinschaftAddress, this.state.deinAnteil)}>Mitmachen</Button>
+                    </Form.Field>
+                    <Form.Field>
+                      <label>Neuer Preis</label>
+                      <Input
+                        placeholder='Preis in Euro'
+                        onChange={event => this.setState({ neuerPreis: event.target.value })}
+                      />
+                      <Button onClick={() => this.preisAendernHandler(lottogemeinschaftAddress)}>Aktualisieren</Button>
+                    </Form.Field>
 
-                <Form.Field>
-                  <label>Neue Anzahl der Mitspieler</label>
-                  <Input
-                    placeholder='Anzahl der Mitspieler'
-                    onChange={event => this.setState({ neueAnzahlMitspieler: event.target.value })}
-                  />
-                  <Button onClick={() => this.anzahlMitspielerAendernHandler(lottogemeinschaftAddress)}>Aktualisieren</Button>
-                </Form.Field>
+                    <Form.Field>
+                      <label>Neue Anzahl der Mitspieler</label>
+                      <Input
+                        placeholder='Anzahl der Mitspieler'
+                        onChange={event => this.setState({ neueAnzahlMitspieler: event.target.value })}
+                      />
+                      <Button onClick={() => this.anzahlMitspielerAendernHandler(lottogemeinschaftAddress)}>Aktualisieren</Button>
+                    </Form.Field>
 
-                {nurErlaubteMitspieler && (
-                  <Form.Field>
-                    <label>Erlaubte Adresse hinzufügen</label>
-                    <Input
-                      placeholder='Adresse'
-                      onChange={event => this.setState({ erlaubteAdresse: event.target.value })}
-                    />
-                    <Button onClick={() => this.erlaubteMitspielerHinzufuegenHandler(lottogemeinschaftAddress)}>Hinzufügen</Button>
-                  </Form.Field>
-                )}
-              </Form>
+                    {nurErlaubteMitspieler && (
+                      <Form.Field>
+                        <label>Erlaubte Adresse hinzufügen</label>
+                        <Input
+                          placeholder='Adresse'
+                          onChange={event => this.setState({ erlaubteAdresse: event.target.value })}
+                        />
+                        <Button onClick={() => this.erlaubteMitspielerHinzufuegenHandler(lottogemeinschaftAddress)}>Hinzufügen</Button>
+                      </Form.Field>
+                    )}
+                  </Form>
 
-              <Button onClick={() => this.gemeinschaftAufloesenHandler(lottogemeinschaftAddress)} color="red">Gemeinschaft auflösen</Button>
-            </Grid.Column>
-          </Grid.Row>
-        );
+                  <Button onClick={() => this.gemeinschaftAufloesenHandler(lottogemeinschaftAddress)} color="red">Gemeinschaft auflösen</Button>
+                </Grid.Column>
+              </Grid.Row>
+            );
+            } else if (anzahlTeilnehmerAktuell < maxTeilnehmerAnzahl)
+                {
+                return (
+              <Grid.Row>
+                <Grid.Column width={16}>
+                  <Form>
+                    {nurErlaubteMitspieler && (
+                      <Form.Field>
+                        <label>Erlaubte Adresse hinzufügen</label>
+                        <Input
+                          placeholder='Adresse'
+                          onChange={event => this.setState({ erlaubteAdresse: event.target.value })}
+                        />
+                        <Button onClick={() => this.erlaubteMitspielerHinzufuegenHandler(lottogemeinschaftAddress)}>Hinzufügen</Button>
+                      </Form.Field>
+                    )}
+                  </Form>
+
+                  <Button onClick={() => this.gemeinschaftAufloesenHandler(lottogemeinschaftAddress)} color="red">Gemeinschaft auflösen</Button>
+                </Grid.Column>
+              </Grid.Row>
+            );
+                }
+            else {
+                return (
+              <Grid.Row>
+                <Grid.Column width={16}>
+                  <Form>
+
+                    <Form.Field>
+                      <label>Gewinn einzahlen</label>
+                      <Input
+                        placeholder='Gewinn in Euro'
+                        onChange={event => this.setState({ gewinn: event.target.value })}
+                      />
+                      <Button onClick={() => this.gewinnEinzahlenHandler(lottogemeinschaftAddress, this.state.gewinn)}>Gewinn einzahlen</Button>
+                    </Form.Field>
+                  </Form>
+                </Grid.Column>
+              </Grid.Row>
+            );
+            }
       } else if (anzahlTeilnehmerAktuell < maxTeilnehmerAnzahl){
             return (<Form.Field>
                 <div>
@@ -228,7 +282,12 @@ class LottogemeinschaftVerwalten extends Component {
                 <Button onClick={() => this.mitmachHandler(this.state.lottogemeinschaftAddress, this.state.deinAnteil)}>Mitmachen für {this.state.preisProMitspieler} Euro</Button>
             </Form.Field>)
       } else {
-        return null; // Keine Buttons rendern, wenn anzahlTeilnehmerAktuell == maxTeilnehmerAnzahl
+            return (<Form.Field>
+                <div>
+                    Gewinn pro Mitspieler: {this.state.gewinnProMitspieler} Euro
+                </div>
+                <Button onClick={() => this.gewinnAbholenHandler(this.state.lottogemeinschaftAddress)} color="green">Gewinn abholen</Button>
+            </Form.Field>)
       }
 
     }
