@@ -60,7 +60,7 @@ class LottogemeinschaftVerwalten extends Component {
     const gewinnProMitspieler = (await lottogemeinschaft.methods.gewinnProMitspieler().call()).toString();
     const gewinnKannAbgeholtWerden = await lottogemeinschaft.methods.gewinnKannAbgeholtWerden().call();
     const nurErlaubteMitspieler = await lottogemeinschaft.methods.nurErlaubteMitspieler().call();
-    const auszahlung = (web3.utils.fromWei(await lottogemeinschaft.methods.auszahlung().call(), "ether")).toString();
+    const auszahlung = (await lottogemeinschaft.methods.gewinnProMitspieler().call()).toString();
 
     this.setState({ lottogemeinschaftAddress : lottogemeinschaftAddress.toString(), lottogemeinschaft, gruender, maxTeilnehmerAnzahl, preisLottoschein, preisProMitspieler, spielauftragsNummer, anzahlTeilnehmerAktuell, gewinnProMitspieler, gewinnKannAbgeholtWerden, nurErlaubteMitspieler, auszahlung: auszahlung.toString()});
 
@@ -125,10 +125,11 @@ class LottogemeinschaftVerwalten extends Component {
       await lottogemeinschaft.methods.einsatzZurueckholen().send({ from: userAddress });
   };
 
-  gewinnEinzahlenHandler = async (lottogemeinschaftAddress, gewinn) => {
+  gewinnEinzahlenHandler = async (lottogemeinschaftAddress, gewinnInEuro) => {
+      const gewinnInWei = gewinnInEuro * this.state.euroInWei
       const { userAddress } = this.state;
       const lottogemeinschaft = Lottogemeinschaft(lottogemeinschaftAddress);
-      await lottogemeinschaft.methods.gewinnEinzahlen(gewinn).send({ from: userAddress, value: gewinn });
+      await lottogemeinschaft.methods.gewinnEinzahlen(gewinnInWei).send({ from: userAddress, value: gewinnInWei });
   };
 
   gewinnAbholenHandler = async (lottogemeinschaftAddress) => {
@@ -172,9 +173,9 @@ class LottogemeinschaftVerwalten extends Component {
           }
       },
       {
-        header: auszahlung ? web3.utils.fromWei(auszahlung, "ether") : "Keine",
+        header: this.state.gewinnProMitspieler ? web3.utils.fromWei(this.state.gewinnProMitspieler, "ether") : "Keine",
         meta: "auszahlung",
-        description: ""
+        description: "in Ether"
       },
       // ... füge weitere Karten hinzu wie benötigt
     ];
@@ -265,9 +266,9 @@ class LottogemeinschaftVerwalten extends Component {
                       <label>Gewinn einzahlen</label>
                       <Input
                         placeholder='Gewinn in Euro'
-                        onChange={event => this.setState({ gewinn: event.target.value })}
+                        onChange={event => this.setState({ gewinnInEuro: event.target.value })}
                       />
-                      <Button onClick={() => this.gewinnEinzahlenHandler(lottogemeinschaftAddress, this.state.gewinn)}>Gewinn einzahlen</Button>
+                      <Button onClick={() => this.gewinnEinzahlenHandler(lottogemeinschaftAddress, this.state.gewinnInEuro)}>Gewinn einzahlen</Button>
                     </Form.Field>
                   </Form>
                 </Grid.Column>
@@ -282,9 +283,10 @@ class LottogemeinschaftVerwalten extends Component {
                 <Button onClick={() => this.mitmachHandler(this.state.lottogemeinschaftAddress, this.state.deinAnteil)}>Mitmachen für {this.state.preisProMitspieler} Euro</Button>
             </Form.Field>)
       } else {
+            const gewinnInEuro = web3.utils.fromWei(this.state.gewinnProMitspieler, "ether") * this.state.euroInWei / 100000000000;
             return (<Form.Field>
                 <div>
-                    Gewinn pro Mitspieler: {this.state.gewinnProMitspieler} Euro
+                    Gewinn pro Mitspieler: {gewinnInEuro} Euro
                 </div>
                 <Button onClick={() => this.gewinnAbholenHandler(this.state.lottogemeinschaftAddress)} color="green">Gewinn abholen</Button>
             </Form.Field>)

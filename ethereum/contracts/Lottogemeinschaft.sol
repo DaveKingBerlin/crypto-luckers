@@ -50,7 +50,7 @@ contract Lottogemeinschaft {
     mapping(address => bool) public gewinnAusgezahlt;
     mapping(address => bool) public einsatzZurueckGezahlt;
     uint16 public anzahlTeilnehmerAktuell;
-    uint48 public gewinnProMitspieler = 0;
+    uint public gewinnProMitspieler = 0;
     bool public gewinnKannAbgeholtWerden=false;
     bool public nurErlaubteMitspieler=false;
     mapping(address => bool) public erlaubterMitspieler;
@@ -112,7 +112,7 @@ contract Lottogemeinschaft {
     }
 
     // Funktion zum Einzahlen des Gewinns
-    function gewinnEinzahlen(uint48 gewinn) public payable restictedToGruender {
+    function gewinnEinzahlen(uint gewinn) public payable restictedToGruender {
         // Überprüfen, ob der übergebene Betrag dem eingezahlten Betrag entspricht
         require(msg.value > 0, "Einzahlungsbetrag muss groesser als 0 sein");
         require(gewinnProMitspieler==0, "Gewinn wurde bereits eingezahlt.");
