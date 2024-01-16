@@ -154,28 +154,24 @@ class LottogemeinschaftVerwalten extends Component {
     const items = [
       {
         header: tippgemeinschaftsName || "",
-        meta: "tippgemeinschaftsName",
-        description: "",
+        meta: "Tippgemeinschaftsname",
+        description: "Name der Tippgemeinschaft",
         style: { overflowWrap: "break-word" },
       },
       {
         header: gruender || "",
-        meta: "gruender",
-        description: "",
+        meta: "Gründer-Adresse",
+        description: "Wallet-Adresse des Lottogemeinschaftsgründer",
       },
       {
       "header": ["Aktuelle Teilnehmerzahl: " + anzahlTeilnehmerAktuell + " | " || "", "Max. Teilnehmeranzahl: " + maxTeilnehmerAnzahl + " | " || "", "Preis pro Mitspieler: " + preisProMitspieler + " | " || "", "Lottoscheinpreispreis: " + preisLottoschein],
       "meta": "Lottogemeinschaftdetails",
-          "description": {
-            "maxteilnehmeranzahl": "Gibt die maximale Anzahl von Teilnehmern an, die für das Ereignis zugelassen sind.",
-            "preislottoschein": "Gibt den Preis für einen einzelnen Lottoschein an.",
-            "anzahlteilnehmeraktuell": "Zeigt die Anzahl der Personen an, die sich bereits für das Ereignis angemeldet haben."
-          }
+          "description": "Aktuelle Teilnehmeranzahl, Maximale Anzahl an Teilnehmern, Preis um bei der Lottogemeinschaft mitzumachen, Gesamtpreis des Lottoscheins"
       },
       {
         header: this.state.gewinnProMitspieler ? web3.utils.fromWei(this.state.gewinnProMitspieler, "ether") : "Keine",
-        meta: "auszahlung",
-        description: "in Ether"
+        meta: "Auszahlungbetrag",
+        description: "Auszahlungbetrag in Ether"
       },
       // ... füge weitere Karten hinzu wie benötigt
     ];
@@ -277,6 +273,12 @@ class LottogemeinschaftVerwalten extends Component {
                         onChange={event => this.setState({ gewinnInEuro: event.target.value })}
                       />
                       <Button onClick={() => this.gewinnEinzahlenHandler(lottogemeinschaftAddress, this.state.gewinnInEuro)}>Gewinn einzahlen</Button>
+                    </Form.Field>
+                    <Form.Field>
+                        <div>
+                            Gewinn pro Mitspieler: {this.state.gewinnInEuro} Euro
+                        </div>
+                        <Button onClick={() => this.gewinnAbholenHandler(this.state.lottogemeinschaftAddress)} color="green">Gewinn abholen</Button>
                     </Form.Field>
                   </Form>
                 </Grid.Column>

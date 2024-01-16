@@ -41,23 +41,23 @@ contract Lottogemeinschaft {
 
     address public gruender;
     string public tippgemeinschaftsName;
-    uint16 public maxTeilnehmerAnzahl;
-    uint32 public preisLottoschein;
-    uint32 public preisProMitspieler;
+    uint256  public maxTeilnehmerAnzahl;
+    uint256  public preisLottoschein;
+    uint256  public preisProMitspieler;
     string public spielauftragsNummer;
-    uint48 public auszahlung;
+    uint256  public auszahlung;
     mapping(address => bool) public mitspieler;
     mapping(address => bool) public gewinnAusgezahlt;
     mapping(address => bool) public einsatzZurueckGezahlt;
-    uint16 public anzahlTeilnehmerAktuell;
-    uint public gewinnProMitspieler = 0;
+    uint256  public anzahlTeilnehmerAktuell;
+    uint256 public gewinnProMitspieler = 0;
     bool public gewinnKannAbgeholtWerden=false;
     bool public nurErlaubteMitspieler=false;
     mapping(address => bool) public erlaubterMitspieler;
     bool private locked;
     bool public aufgeloest;
 
-    constructor (string memory name, address ersteller, uint16 anzahl, uint32 preis, string memory scheinNummer, bool mitspielerBestimmen) {
+    constructor (string memory name, address ersteller, uint256  anzahl, uint256  preis, string memory scheinNummer, bool mitspielerBestimmen) {
         require(anzahl < 65535, "Maximal 65534 Mitspieler erlaubt");
         require(preis < 4294967295, "Maximaler Preis 4294967295");
         gruender = ersteller;
@@ -66,7 +66,7 @@ contract Lottogemeinschaft {
         preisLottoschein = preis;
         nurErlaubteMitspieler = mitspielerBestimmen;
         spielauftragsNummer = scheinNummer;
-        preisProMitspieler = uint32(uint256(preisLottoschein) * 1e18 / maxTeilnehmerAnzahl / 1e18); // Rückumwandlung in uint32
+        preisProMitspieler = preisLottoschein * 1e18 / maxTeilnehmerAnzahl / 1e18; // Rückumwandlung in uint256
     }
 
 
@@ -101,7 +101,7 @@ contract Lottogemeinschaft {
 
 
         // Effects
-        uint ueberschuss = msg.value - preisProMitspieler;
+        uint256  ueberschuss = msg.value - preisProMitspieler;
         mitspieler[msg.sender] = true;
         anzahlTeilnehmerAktuell++;
 
@@ -112,7 +112,7 @@ contract Lottogemeinschaft {
     }
 
     // Funktion zum Einzahlen des Gewinns
-    function gewinnEinzahlen(uint gewinn) public payable restictedToGruender {
+    function gewinnEinzahlen(uint256  gewinn) public payable restictedToGruender {
         // Überprüfen, ob der übergebene Betrag dem eingezahlten Betrag entspricht
         require(msg.value > 0, "Einzahlungsbetrag muss groesser als 0 sein");
         require(gewinnProMitspieler==0, "Gewinn wurde bereits eingezahlt.");
@@ -134,17 +134,17 @@ contract Lottogemeinschaft {
 
         gewinnAusgezahlt[msg.sender] = true;
 
-        uint auszahlungsbetrag = gewinnProMitspieler;
+        uint256  auszahlungsbetrag = gewinnProMitspieler;
         payable(msg.sender).transfer(auszahlungsbetrag);
     }
 
 
-    function preisLottoscheinAendern(uint32 neuerPreis) public restictedToGruender{
+    function preisLottoscheinAendern(uint256  neuerPreis) public restictedToGruender{
         require(anzahlTeilnehmerAktuell==0, "Es gibt bereits Mitspieler. Preisaenderung nicht mehr moeglich.");
         preisLottoschein = neuerPreis;
     }
 
-    function anzahlMitspielerAendern(uint16 neueAnzahlMaxTeilnehmer) public restictedToGruender{
+    function anzahlMitspielerAendern(uint256  neueAnzahlMaxTeilnehmer) public restictedToGruender{
         require(anzahlTeilnehmerAktuell==0, "Es gibt bereits Mitspieler. Aenderung der Anzahl an Mitspielern nicht mehr moeglich.");
         maxTeilnehmerAnzahl = neueAnzahlMaxTeilnehmer;
     }
@@ -168,7 +168,7 @@ contract Lottogemeinschaft {
 
         einsatzZurueckGezahlt[msg.sender] = true;
 
-        uint rueckzahlungsbetrag = preisProMitspieler;
+        uint256 rueckzahlungsbetrag = preisProMitspieler;
         (bool sent, ) = msg.sender.call{value: rueckzahlungsbetrag}("");
         require(sent, "Rueckzahlung des Einsatzes fehlgeschlagen.");
     }
