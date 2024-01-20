@@ -180,11 +180,12 @@ class LottogemeinschaftVerwalten extends Component {
   }
 
   renderButtons() {
-      const { userAddress, gruender, nurErlaubteMitspieler, preisProMitspieler, lottogemeinschaftAddress, anzahlTeilnehmerAktuell, maxTeilnehmerAnzahl } = this.state;
+      const { userAddress, gruender, nurErlaubteMitspieler, preisProMitspieler, lottogemeinschaftAddress, anzahlTeilnehmerAktuell, maxTeilnehmerAnzahl, gewinnInEuro } = this.state;
       const isGruender = userAddress === gruender;
       const nochKeineMitspieler = Number(anzahlTeilnehmerAktuell) === 0;
       const bereitsMitspieler = 0 < Number(anzahlTeilnehmerAktuell) && Number(anzahlTeilnehmerAktuell) < Number(maxTeilnehmerAnzahl);
       const istVoll = Number(anzahlTeilnehmerAktuell) === Number(maxTeilnehmerAnzahl);
+      const gewinnIstEingezahlt = Number(gewinnInEuro) > 0;
 
       if (isGruender && nochKeineMitspieler) {
             return (
