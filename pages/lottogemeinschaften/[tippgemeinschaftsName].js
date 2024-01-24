@@ -138,6 +138,11 @@ class LottogemeinschaftVerwalten extends Component {
       await lottogemeinschaft.methods.gewinnAbholen().send({ from: userAddress });
   };
 
+  einsatzAbholenHandler = async (lottogemeinschaftAddress) => {
+      const { userAddress } = this.state;
+      const lottogemeinschaft = Lottogemeinschaft(lottogemeinschaftAddress);
+      await lottogemeinschaft.methods.einsatzAbholen().send({ from: userAddress });
+  };
 
   renderCards() {
     const {
@@ -266,7 +271,10 @@ class LottogemeinschaftVerwalten extends Component {
               <Grid.Row>
                 <Grid.Column width={16}>
                   <Form>
-
+                    <Form.Field>
+                      <label>Einsatz für Lottoschein abholen</label>
+                      <Button onClick={() => this.einsatzAbholenHandler(lottogemeinschaftAddress)}>Einsatz abholen</Button>
+                    </Form.Field>
                     <Form.Field>
                       <label>Gewinn einzahlen</label>
                       <Input
