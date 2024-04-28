@@ -28,7 +28,9 @@
     "start": "next start",
     "build": "next build",
     "test": "mocha",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "compile": "hardhat compile",
+    "compile-optimized": "hardhat compile --optimizer"
   },
   "eslintConfig": {
     "extends": [

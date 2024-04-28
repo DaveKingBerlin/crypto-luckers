@@ -16,6 +16,10 @@ const input = {
     },
   },
   settings: {
+    optimizer: {
+      enabled: true,
+      runs: 50000 // Standard ist 200, aber du kannst diesen Wert an deine Anforderungen anpassen
+    },
     outputSelection: {
       '*': {
         '*': ['*'],

@@ -1,0 +1,100 @@
+Feature: LottogemeinschaftFabrik Management
+
+  Scenario: Gründung einer neuen Lottogemeinschaft
+    Given es gibt keinen Konflikt mit dem gewählten Namen
+    When der Benutzer eine Lottogemeinschaft mit dem Namen "Happy Winners" und gültigen Parametern gründet
+    Then sollte eine neue Lottogemeinschaft erstellt werden
+    And ein Event "LottogemeinschaftGegruendet" mit der Adresse und dem Namen "Happy Winners" sollte ausgelöst werden
+
+  Scenario: Versuch, eine Lottogemeinschaft mit ungültigem Namen zu gründen
+    Given der Name der Lottogemeinschaft ist leer
+    When der Benutzer versucht, die Lottogemeinschaft zu gründen
+    Then sollte die Transaktion fehlschlagen
+    And ein Event "FehlerBeimGruenden" mit einer Fehlermeldung sollte ausgelöst werden
+
+  Scenario: Abrufen der Liste gegründeter Lottogemeinschaften
+    Given es wurden bereits mehrere Lottogemeinschaften gegründet
+    When der Benutzer die Liste der gegründeten Lottogemeinschaften abruft
+    Then sollte die Liste aller gegründeten Lottogemeinschaften zurückgegeben werden
+
+Feature: Lottogemeinschaft Operations
+
+  Scenario: Beitritt zu einer Lottogemeinschaft
+    Given der Benutzer ist nicht bereits ein Teilnehmer
+    And die maximale Teilnehmerzahl ist noch nicht erreicht
+    When der Benutzer den korrekten Betrag einzahlt, um der Lottogemeinschaft beizutreten
+    Then sollte der Benutzer als neuer Mitspieler registriert werden
+    And der Betrag sollte dem Vertrag hinzugefügt werden
+
+  Scenario: Gewinn durch den Gründer einzahlen
+    Given der Benutzer ist der Gründer der Lottogemeinschaft
+    And kein Gewinn wurde bisher eingezahlt
+    When der Gründer einen Gewinnbetrag in den Vertrag einzahlt
+    Then sollte der eingezahlte Betrag als Gewinn registriert werden
+    And der Status für das Abholen des Gewinns sollte aktualisiert werden
+
+  Scenario: Einsatz durch den Gründer abholen
+    Given der Benutzer ist der Gründer
+    And der Gewinn wurde noch nicht eingezahlt
+    When der Gründer versucht, den Einsatz abzuholen
+    Then sollte der gesamte Vertragsbetrag an den Gründer überwiesen werden
+    And der Vertragsbetrag sollte danach null sein
+
+Feature: Performance und Sicherheit der LottogemeinschaftFabrik
+
+  Scenario: Gründung mehrerer Lottogemeinschaften in kurzer Zeit
+    Given der Benutzer ist berechtigt, Lottogemeinschaften zu gründen
+    When der Benutzer 100 Lottogemeinschaften innerhalb von einer Minute gründet
+    Then sollten alle Lottogemeinschaften erfolgreich gegründet werden
+    And die durchschnittliche Transaktionszeit sollte unter 5 Sekunden liegen
+
+  Scenario: Handling von simultanen Beitrittsanfragen
+    Given eine Lottogemeinschaft existiert mit einer maximalen Teilnehmerzahl von 10
+    And aktuell gibt es 9 Teilnehmer
+    When 5 Benutzer versuchen gleichzeitig beizutreten
+    Then sollte nur einer erfolgreich beitreten
+    And die anderen 4 sollten eine Fehlermeldung erhalten wegen Erreichen der maximalen Teilnehmerzahl
+
+Feature: Sicherheitsaspekte der Lottogemeinschaft
+
+  Scenario: Verhindern von Reentrancy-Angriffen
+    Given der Benutzer ist der Gründer der Lottogemeinschaft
+    And der Gewinn wurde bereits eingezahlt
+    When der Gründer versucht, den Einsatz mehrmals hintereinander abzuholen
+    Then sollte nur die erste Anfrage erfolgreich sein
+    And alle weiteren Anfragen sollten fehlschlagen mit einer Sicherheitsverletzungswarnung
+
+  Scenario: Zugriffsrechte auf sensible Funktionen
+    Given es gibt eine bestehende Lottogemeinschaft
+    When ein nicht autorisierter Benutzer versucht, den Gewinn einzuzahlen
+    Then sollte die Transaktion fehlschlagen
+    And eine Fehlermeldung sollte ausgegeben werden, dass nur der Gründer diese Funktion ausführen kann
+
+  Scenario: Schutz gegen unautorisierte Beitritte
+    Given eine Lottogemeinschaft erlaubt nur vorher genehmigte Mitspieler
+    When ein nicht autorisierter Benutzer versucht, der Lottogemeinschaft beizutreten
+    Then sollte die Transaktion fehlschlagen
+    And eine Fehlermeldung sollte ausgegeben werden, dass der Benutzer nicht genehmigt ist
+
+Feature: Kosteneffizienz der LottogemeinschaftFabrik und Lottogemeinschaft
+
+  Scenario: Kostenüberprüfung für die Gründung einer Lottogemeinschaft
+    Given ein Benutzer möchte eine Lottogemeinschaft gründen
+    When der Benutzer eine Lottogemeinschaft mit validen Parametern erstellt
+    Then sollte der Gasverbrauch der Transaktion erfasst werden
+    And der Gasverbrauch sollte unter einem festgelegten Schwellenwert von 200000 Gas liegen
+
+  Scenario: Kostenüberprüfung beim Beitritt zu einer Lottogemeinschaft
+    Given eine Lottogemeinschaft existiert bereits
+    When ein Benutzer den erforderlichen Betrag einzahlt, um der Lottogemeinschaft beizutreten
+    Then sollte der Gasverbrauch der Transaktion erfasst werden
+    And der Gasverbrauch sollte unter einem festgelegten Schwellenwert von 100000 Gas liegen
+
+  Scenario: Optimierung des Gasverbrauchs durch Code-Refactoring
+    Given der Entwickler identifiziert eine ineffiziente Funktion im Smart Contract
+    When der Code der Funktion optimiert wird, um die Gasnutzung zu minimieren
+    Then sollte der überarbeitete Smart Contract weniger Gas verbrauchen als die vorherige Version
+    And die Funktionalität des Smart Contracts bleibt unverändert
+
+
+

@@ -4,7 +4,7 @@ import LottogemeinschaftFabrik from "./build/LottogemeinschaftFabrik.json";
 
 const instance = new web3.eth.Contract(
   LottogemeinschaftFabrik.abi,
-  '0xA4f8ffA6da2063B1007A7B729ec2C5E4b74dE833'
+  '0xA0c000EDF286AaF85bbaD87EEbEcc781CDCe12A8'
 );
 
 export default instance;
